@@ -15,11 +15,10 @@ export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onC
         </span>
       );
     }
-    
     if (category.type === 'textbook') {
       return (
         <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-md border border-emerald-100 flex items-center gap-1 shrink-0">
-          <Book className="w-3 h-3" /> {category.version} B{category.book}
+          <Book className="w-3 h-3" /> {category.version} B{category.book}{category.unit ? ` U${category.unit}` : ''}
         </span>
       );
     } else if (category.type === 'magazine') {

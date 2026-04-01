@@ -9,6 +9,7 @@ export default function ChooseCategoryModal({ isOpen, onClose, onConfirm, wordTo
   // 課本狀態
   const [textbookVersion, setTextbookVersion] = useState('');
   const [textbookBook, setTextbookBook] = useState('1'); // 第1~6冊
+  const [textbookUnit, setTextbookUnit] = useState('1'); // 第1~12課
   
   // 雜誌狀態
   const [magazineBrand, setMagazineBrand] = useState('');
@@ -39,7 +40,8 @@ export default function ChooseCategoryModal({ isOpen, onClose, onConfirm, wordTo
       categoryData = {
         type: 'textbook',
         version: textbookVersion,
-        book: textbookBook
+        book: textbookBook,
+        unit: textbookUnit
       };
     } else if (categoryType === 'magazine') {
       categoryData = {
@@ -120,17 +122,31 @@ export default function ChooseCategoryModal({ isOpen, onClose, onConfirm, wordTo
                     {settings.textbookVersions.length === 0 && <option value="" disabled>請先至設定新增版本</option>}
                   </select>
                 </div>
-                <div>
-                  <label className="text-sm font-semibold text-slate-700 mb-1 block">冊數</label>
-                  <select
-                    value={textbookBook}
-                    onChange={(e) => setTextbookBook(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                  >
-                    {[1, 2, 3, 4, 5, 6].map(b => (
-                      <option key={b} value={b}>第 {b} 冊</option>
-                    ))}
-                  </select>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label className="text-sm font-semibold text-slate-700 mb-1 block">冊數</label>
+                    <select
+                      value={textbookBook}
+                      onChange={(e) => setTextbookBook(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    >
+                      {[1, 2, 3, 4, 5, 6].map(b => (
+                        <option key={b} value={b}>第 {b} 冊</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-sm font-semibold text-slate-700 mb-1 block">第幾課</label>
+                    <select
+                      value={textbookUnit}
+                      onChange={(e) => setTextbookUnit(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    >
+                      {Array.from({length: 20}, (_, i) => i + 1).map(u => (
+                        <option key={u} value={u}>第 {u} 課</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             )}

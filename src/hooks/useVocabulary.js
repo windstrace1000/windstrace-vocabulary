@@ -11,7 +11,9 @@ export function useVocabulary(userId) {
   const [sortBy, setSortBy] = useState('date-desc');
   const [filterText, setFilterText] = useState('');
   const [categoryTypeFilter, setCategoryTypeFilter] = useState('all');
-  const [subCategoryFilter, setSubCategoryFilter] = useState('all');
+  const [categoryL2Filter, setCategoryL2Filter] = useState('all');
+  const [categoryL3Filter, setCategoryL3Filter] = useState('all');
+  const [categoryL4Filter, setCategoryL4Filter] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
   const [isGrouped, setIsGrouped] = useState(false);
   const [expandedWordId, setExpandedWordId] = useState(null);
@@ -36,7 +38,9 @@ export function useVocabulary(userId) {
 
   // 當主分類改變時，重置子分類
   useEffect(() => {
-    setSubCategoryFilter('all');
+    setCategoryL2Filter('all');
+    setCategoryL3Filter('all');
+    setCategoryL4Filter('all');
   }, [categoryTypeFilter]);
 
   // 儲存單字
@@ -63,24 +67,33 @@ export function useVocabulary(userId) {
 
   // 移除 uniquePosList，保留 uniqueCategoryList
 
-  // 取得所有不重複的分類清單
-  const uniqueCategoryList = useMemo(() => {
-    const categoryMap = new Map();
+  // 取得目前分類可用的選項清單
+  const filterOptions = useMemo(() => {
+    const l2Set = new Set();
+    const l3Set = new Set();
+    const l4Set = new Set();
+
     savedWords.forEach(w => {
-      const type = w.category?.type || 'lifestyle';
-      let id = 'lifestyle';
-      let label = '日常・生活';
-      if (type === 'textbook') {
-        id = `textbook-${w.category.version}-${w.category.book}`;
-        label = `課本 (${w.category.version} 第${w.category.book}冊)`;
-      } else if (type === 'magazine') {
-        id = `magazine-${w.category.brand}-${w.category.year}-${w.category.month}`;
-        label = `雜誌 (${w.category.brand} ${w.category.year}/${w.category.month})`;
+      const cat = w.category || { type: 'lifestyle' };
+      if (cat.type === categoryTypeFilter) {
+        if (cat.type === 'textbook') {
+          if (cat.version) l2Set.add(cat.version);
+          if (cat.book) l3Set.add(String(cat.book));
+          if (cat.unit) l4Set.add(String(cat.unit));
+        } else if (cat.type === 'magazine') {
+          if (cat.brand) l2Set.add(cat.brand);
+          if (cat.year) l3Set.add(String(cat.year));
+          if (cat.month) l4Set.add(String(cat.month));
+        }
       }
-      categoryMap.set(id, { id, label, type });
     });
-    return Array.from(categoryMap.values()).sort((a, b) => b.type.localeCompare(a.type));
-  }, [savedWords]);
+
+    return {
+      l2List: Array.from(l2Set).sort(),
+      l3List: Array.from(l3Set).sort((a,b) => parseInt(a) - parseInt(b)),
+      l4List: Array.from(l4Set).sort((a,b) => parseInt(a) - parseInt(b)),
+    };
+  }, [savedWords, categoryTypeFilter]);
 
   // 篩選、排序後的單字列表
   const processedWords = useMemo(() => {
@@ -93,15 +106,15 @@ export function useVocabulary(userId) {
         return type === categoryTypeFilter;
       });
       
-      // 子分類過濾 (僅適用於課本和雜誌)
-      if (subCategoryFilter !== 'all') {
-        result = result.filter(w => {
-          const type = w.category?.type || 'lifestyle';
-          let id = 'lifestyle';
-          if (type === 'textbook') id = `textbook-${w.category.version}-${w.category.book}`;
-          else if (type === 'magazine') id = `magazine-${w.category.brand}-${w.category.year}-${w.category.month}`;
-          return id === subCategoryFilter;
-        });
+      // 細項分類過濾
+      if (categoryTypeFilter === 'textbook') {
+        if (categoryL2Filter !== 'all') result = result.filter(w => w.category?.version === categoryL2Filter);
+        if (categoryL3Filter !== 'all') result = result.filter(w => String(w.category?.book) === categoryL3Filter);
+        if (categoryL4Filter !== 'all') result = result.filter(w => String(w.category?.unit) === categoryL4Filter);
+      } else if (categoryTypeFilter === 'magazine') {
+        if (categoryL2Filter !== 'all') result = result.filter(w => w.category?.brand === categoryL2Filter);
+        if (categoryL3Filter !== 'all') result = result.filter(w => String(w.category?.year) === categoryL3Filter);
+        if (categoryL4Filter !== 'all') result = result.filter(w => String(w.category?.month) === categoryL4Filter);
       }
     }
     
@@ -123,7 +136,7 @@ export function useVocabulary(userId) {
       }
     });
     return result;
-  }, [savedWords, filterText, sortBy, categoryTypeFilter, subCategoryFilter]);
+  }, [savedWords, filterText, sortBy, categoryTypeFilter, categoryL2Filter, categoryL3Filter, categoryL4Filter]);
 
   // 按日期分組
   const groupedWords = useMemo(() => {
@@ -157,11 +170,13 @@ export function useVocabulary(userId) {
     sortBy, setSortBy,
     filterText, setFilterText,
     categoryTypeFilter, setCategoryTypeFilter,
-    subCategoryFilter, setSubCategoryFilter,
+    categoryL2Filter, setCategoryL2Filter,
+    categoryL3Filter, setCategoryL3Filter,
+    categoryL4Filter, setCategoryL4Filter,
     viewMode, setViewMode,
     isGrouped, setIsGrouped,
     expandedWordId, setExpandedWordId,
-    uniqueCategoryList, processedWords, groupedWords,
+    filterOptions, processedWords, groupedWords,
     saveWord, removeWord, refreshWords: fetchWords,
   };
 }

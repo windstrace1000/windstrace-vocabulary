@@ -8,9 +8,13 @@ import WordCard from './WordCard';
 export default function ListTab({ vocabulary, onSearch, onDeleteWord }) {
   const {
     savedWords, sortBy, setSortBy, filterText, setFilterText,
-    categoryTypeFilter, setCategoryTypeFilter, subCategoryFilter, setSubCategoryFilter, viewMode, setViewMode,
+    categoryTypeFilter, setCategoryTypeFilter,
+    categoryL2Filter, setCategoryL2Filter,
+    categoryL3Filter, setCategoryL3Filter,
+    categoryL4Filter, setCategoryL4Filter,
+    viewMode, setViewMode,
     isGrouped, setIsGrouped, expandedWordId, setExpandedWordId,
-    uniqueCategoryList, processedWords, groupedWords,
+    filterOptions, processedWords, groupedWords,
   } = vocabulary;
 
   const renderWordCard = (wordData) => (
@@ -46,36 +50,54 @@ export default function ListTab({ vocabulary, onSearch, onDeleteWord }) {
               />
             </div>
 
-            {/* 第二列：分類的下拉式選單 (強制同一列) */}
-            <div className="flex flex-row gap-2 w-full">
-              {/* 大分類篩選器 */}
+            {/* 第二列：主分類下拉式選單 */}
+            <div className="flex w-full">
               <select
                 value={categoryTypeFilter}
                 onChange={(e) => setCategoryTypeFilter(e.target.value)}
                 className="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl px-2 sm:px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer flex-1 min-w-0 shadow-sm"
               >
-                <option value="all">所有分類</option>
+                <option value="all">所有分類單字</option>
                 <option value="textbook">📖 課本</option>
                 <option value="magazine">📰 雜誌</option>
                 <option value="lifestyle">☕ 生活</option>
               </select>
-
-              {/* 細項分類篩選器 (只在選擇課本或雜誌時顯示) */}
-              {(categoryTypeFilter === 'textbook' || categoryTypeFilter === 'magazine') && (
-                <select
-                  value={subCategoryFilter}
-                  onChange={(e) => setSubCategoryFilter(e.target.value)}
-                  className="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl px-2 sm:px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer flex-1 min-w-0 shadow-sm animate-in fade-in slide-in-from-left-2"
-                >
-                  <option value="all">所有{categoryTypeFilter === 'textbook' ? '課本' : '雜誌'}</option>
-                  {uniqueCategoryList
-                    .filter(cat => cat.type === categoryTypeFilter)
-                    .map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.label.replace('課本 (', '').replace('雜誌 (', '').replace(')', '')}</option>
-                  ))}
-                </select>
-              )}
             </div>
+
+            {/* 第三列：動態細項分類 */}
+            {(categoryTypeFilter === 'textbook' || categoryTypeFilter === 'magazine') && (
+              <div className="flex flex-row gap-2 w-full animate-in fade-in slide-in-from-top-2">
+                {/* Layer 2: 版本/品牌 */}
+                <select
+                  value={categoryL2Filter}
+                  onChange={(e) => setCategoryL2Filter(e.target.value)}
+                  className="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl px-2 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer flex-1 min-w-0 shadow-sm"
+                >
+                  <option value="all">所有{categoryTypeFilter === 'textbook' ? '版本' : '品牌'}</option>
+                  {filterOptions?.l2List?.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+
+                {/* Layer 3: 冊數/年份 */}
+                <select
+                  value={categoryL3Filter}
+                  onChange={(e) => setCategoryL3Filter(e.target.value)}
+                  className="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl px-2 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer flex-1 min-w-0 shadow-sm"
+                >
+                  <option value="all">所有{categoryTypeFilter === 'textbook' ? '冊數' : '年份'}</option>
+                  {filterOptions?.l3List?.map(v => <option key={v} value={v}>{categoryTypeFilter === 'textbook' ? `第 ${v} 冊` : `${v} 年`}</option>)}
+                </select>
+
+                {/* Layer 4: 課別/月份 */}
+                <select
+                  value={categoryL4Filter}
+                  onChange={(e) => setCategoryL4Filter(e.target.value)}
+                  className="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl px-2 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer flex-1 min-w-0 shadow-sm"
+                >
+                  <option value="all">所有{categoryTypeFilter === 'textbook' ? '課別' : '月份'}</option>
+                  {filterOptions?.l4List?.map(v => <option key={v} value={v}>{categoryTypeFilter === 'textbook' ? `第 ${v} 課` : `${v} 月`}</option>)}
+                </select>
+              </div>
+            )}
 
             {/* 第三列：排序與檢視切換 */}
             <div className="flex flex-row justify-between items-center gap-2 w-full">
