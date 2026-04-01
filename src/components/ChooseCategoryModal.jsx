@@ -21,12 +21,64 @@ export default function ChooseCategoryModal({ isOpen, onClose, onConfirm, wordTo
       const currentSettings = getCategorySettings();
       setSettings(currentSettings);
       
-      // 設定初始預設選項
-      if (currentSettings.textbookVersions.length > 0 && !textbookVersion) {
-        setTextbookVersion(currentSettings.textbookVersions[0]);
+      const lastSelectionStr = localStorage.getItem('lastCategorySelection');
+      let loadedFromStorage = false;
+
+      if (lastSelectionStr) {
+        try {
+          const lastSelection = JSON.parse(lastSelectionStr);
+          if (lastSelection.type) {
+            setCategoryType(lastSelection.type);
+            loadedFromStorage = true;
+          }
+          
+          if (lastSelection.type === 'textbook') {
+            if (currentSettings.textbookVersions.includes(lastSelection.version)) {
+              setTextbookVersion(lastSelection.version);
+            } else if (currentSettings.textbookVersions.length > 0) {
+              setTextbookVersion(currentSettings.textbookVersions[0]);
+            }
+            if (lastSelection.book) setTextbookBook(String(lastSelection.book));
+            if (lastSelection.unit) setTextbookUnit(String(lastSelection.unit));
+            
+            if (currentSettings.magazineBrands.length > 0) {
+              setMagazineBrand(currentSettings.magazineBrands[0]);
+            }
+          } else if (lastSelection.type === 'magazine') {
+            if (currentSettings.magazineBrands.includes(lastSelection.brand)) {
+              setMagazineBrand(lastSelection.brand);
+            } else if (currentSettings.magazineBrands.length > 0) {
+              setMagazineBrand(currentSettings.magazineBrands[0]);
+            }
+            if (lastSelection.year) setMagazineYear(String(lastSelection.year));
+            if (lastSelection.month) setMagazineMonth(String(lastSelection.month));
+            
+            if (currentSettings.textbookVersions.length > 0) {
+              setTextbookVersion(currentSettings.textbookVersions[0]);
+            }
+          } else {
+            // lifestyle 或其他
+            if (currentSettings.textbookVersions.length > 0) {
+              setTextbookVersion(currentSettings.textbookVersions[0]);
+            }
+            if (currentSettings.magazineBrands.length > 0) {
+              setMagazineBrand(currentSettings.magazineBrands[0]);
+            }
+          }
+        } catch (e) {
+          console.error('Failed to parse last category selection', e);
+          loadedFromStorage = false;
+        }
       }
-      if (currentSettings.magazineBrands.length > 0 && !magazineBrand) {
-        setMagazineBrand(currentSettings.magazineBrands[0]);
+      
+      if (!loadedFromStorage) {
+        // 設定初始預設選項
+        if (currentSettings.textbookVersions.length > 0 && !textbookVersion) {
+          setTextbookVersion(currentSettings.textbookVersions[0]);
+        }
+        if (currentSettings.magazineBrands.length > 0 && !magazineBrand) {
+          setMagazineBrand(currentSettings.magazineBrands[0]);
+        }
       }
     }
   }, [isOpen]);
@@ -51,6 +103,9 @@ export default function ChooseCategoryModal({ isOpen, onClose, onConfirm, wordTo
         month: magazineMonth
       };
     }
+
+    // 將最近一次的選擇儲存到 localStorage，以便下次開啟時預設選取
+    localStorage.setItem('lastCategorySelection', JSON.stringify(categoryData));
 
     onConfirm(categoryData);
   };

@@ -24,7 +24,12 @@ export function useVocabulary(userId) {
     try {
       setLoading(true);
       const words = await getWords(userId);
-      setSavedWords(words);
+      // 正規化 categories
+      const normalizedWords = words.map(w => ({
+        ...w,
+        categories: Array.isArray(w.category) ? w.category : (w.category ? [w.category] : [{ type: 'lifestyle' }])
+      }));
+      setSavedWords(normalizedWords);
     } catch (error) {
       console.error('載入單字失敗:', error);
     } finally {
@@ -74,18 +79,20 @@ export function useVocabulary(userId) {
     const l4Set = new Set();
 
     savedWords.forEach(w => {
-      const cat = w.category || { type: 'lifestyle' };
-      if (cat.type === categoryTypeFilter) {
-        if (cat.type === 'textbook') {
-          if (cat.version) l2Set.add(cat.version);
-          if (cat.book) l3Set.add(String(cat.book));
-          if (cat.unit) l4Set.add(String(cat.unit));
-        } else if (cat.type === 'magazine') {
-          if (cat.brand) l2Set.add(cat.brand);
-          if (cat.year) l3Set.add(String(cat.year));
-          if (cat.month) l4Set.add(String(cat.month));
+      const categories = w.categories || (w.category ? [w.category] : [{ type: 'lifestyle' }]);
+      categories.forEach(cat => {
+        if (cat.type === categoryTypeFilter) {
+          if (cat.type === 'textbook') {
+            if (cat.version) l2Set.add(cat.version);
+            if (cat.book) l3Set.add(String(cat.book));
+            if (cat.unit) l4Set.add(String(cat.unit));
+          } else if (cat.type === 'magazine') {
+            if (cat.brand) l2Set.add(cat.brand);
+            if (cat.year) l3Set.add(String(cat.year));
+            if (cat.month) l4Set.add(String(cat.month));
+          }
         }
-      }
+      });
     });
 
     return {
@@ -102,20 +109,22 @@ export function useVocabulary(userId) {
     // 主分類過濾
     if (categoryTypeFilter !== 'all') {
       result = result.filter(w => {
-        const type = w.category?.type || 'lifestyle';
-        return type === categoryTypeFilter;
+        const categories = w.categories || (w.category ? [w.category] : [{ type: 'lifestyle' }]);
+        return categories.some(cat => {
+          if (cat.type !== categoryTypeFilter) return false;
+          
+          if (categoryTypeFilter === 'textbook') {
+            if (categoryL2Filter !== 'all' && cat.version !== categoryL2Filter) return false;
+            if (categoryL3Filter !== 'all' && String(cat.book) !== categoryL3Filter) return false;
+            if (categoryL4Filter !== 'all' && String(cat.unit) !== categoryL4Filter) return false;
+          } else if (categoryTypeFilter === 'magazine') {
+            if (categoryL2Filter !== 'all' && cat.brand !== categoryL2Filter) return false;
+            if (categoryL3Filter !== 'all' && String(cat.year) !== categoryL3Filter) return false;
+            if (categoryL4Filter !== 'all' && String(cat.month) !== categoryL4Filter) return false;
+          }
+          return true;
+        });
       });
-      
-      // 細項分類過濾
-      if (categoryTypeFilter === 'textbook') {
-        if (categoryL2Filter !== 'all') result = result.filter(w => w.category?.version === categoryL2Filter);
-        if (categoryL3Filter !== 'all') result = result.filter(w => String(w.category?.book) === categoryL3Filter);
-        if (categoryL4Filter !== 'all') result = result.filter(w => String(w.category?.unit) === categoryL4Filter);
-      } else if (categoryTypeFilter === 'magazine') {
-        if (categoryL2Filter !== 'all') result = result.filter(w => w.category?.brand === categoryL2Filter);
-        if (categoryL3Filter !== 'all') result = result.filter(w => String(w.category?.year) === categoryL3Filter);
-        if (categoryL4Filter !== 'all') result = result.filter(w => String(w.category?.month) === categoryL4Filter);
-      }
     }
     
     // 關鍵字搜尋過濾

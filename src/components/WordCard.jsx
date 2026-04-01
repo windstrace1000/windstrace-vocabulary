@@ -51,7 +51,9 @@ export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onC
               </div>
               <div className="flex items-center gap-2 text-lg flex-wrap">
                 <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded-md">{wordData.partOfSpeech}</span>
-                {renderCategoryBadge(wordData.category)}
+                {(wordData.categories || []).map((cat, idx) => (
+                  <span key={idx} className="shrink-0">{renderCategoryBadge(cat)}</span>
+                ))}
                 <span className="text-slate-700 font-medium">{wordData.translation}</span>
               </div>
             </div>
@@ -139,7 +141,9 @@ export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onC
             <h3 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{wordData.word}</h3>
             <div className="flex flex-wrap gap-1 mt-1">
               <span className="text-xs font-semibold px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded">{wordData.partOfSpeech}</span>
-              {renderCategoryBadge(wordData.category)}
+              {(wordData.categories || []).map((cat, idx) => (
+                <span key={idx} className="shrink-0">{renderCategoryBadge(cat)}</span>
+              ))}
             </div>
           </div>
           <div className="flex gap-1">
@@ -161,7 +165,9 @@ export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onC
         <div className="w-40 flex-shrink-0 flex flex-col justify-center">
           <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate leading-tight">{wordData.word}</h3>
           <div className="flex flex-wrap gap-1 mt-1">
-            {renderCategoryBadge(wordData.category)}
+            {(wordData.categories || []).map((cat, idx) => (
+              <span key={idx} className="shrink-0">{renderCategoryBadge(cat)}</span>
+            ))}
           </div>
         </div>
         <div className="hidden sm:block flex-shrink-0 w-20">

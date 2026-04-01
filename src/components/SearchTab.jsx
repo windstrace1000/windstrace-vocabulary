@@ -19,7 +19,23 @@ export default function SearchTab({
   };
 
   const handleSaveWithCategory = (categoryData) => {
-    onSaveWord({ ...searchResult, category: categoryData });
+    const existingWord = searchResult && savedWords.find(
+      w => w.word.toLowerCase() === searchResult.word.toLowerCase()
+    );
+    
+    // 如果已經存過，就把新的 category 加進原本的 categories 陣列中
+    let newCategories = existingWord ? [...(existingWord.categories || [])] : [];
+    
+    // 檢查是否已存在相同的分類
+    const isDuplicate = newCategories.some(c => JSON.stringify(c) === JSON.stringify(categoryData));
+    if (!isDuplicate) {
+      newCategories.push(categoryData);
+    }
+
+    onSaveWord({ 
+      ...(existingWord || searchResult), 
+      category: newCategories 
+    });
     setIsCategoryModalOpen(false);
   };
 
@@ -77,20 +93,17 @@ export default function SearchTab({
               </div>
             </div>
 
-            {isWordSaved ? (
-              <button disabled className="flex items-center gap-1 text-sm font-medium text-emerald-700 bg-emerald-100 px-4 py-2 rounded-lg cursor-default">
-                <BookmarkCheck className="w-5 h-5" />
-                <span className="hidden sm:inline">已儲存</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => setIsCategoryModalOpen(true)}
-                className="flex items-center gap-1 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition-colors"
-              >
-                <BookmarkPlus className="w-5 h-5" />
-                <span className="hidden sm:inline">記下來</span>
-              </button>
-            )}
+            <button
+              onClick={() => setIsCategoryModalOpen(true)}
+              className={`flex items-center gap-1 text-sm font-medium px-4 py-2 rounded-lg transition-colors ${
+                isWordSaved 
+                  ? 'text-emerald-700 bg-emerald-100 hover:bg-emerald-200' 
+                  : 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100'
+              }`}
+            >
+              {isWordSaved ? <BookmarkCheck className="w-5 h-5" /> : <BookmarkPlus className="w-5 h-5" />}
+              <span className="hidden sm:inline">{isWordSaved ? '+ 加入其他分類' : '記下來'}</span>
+            </button>
           </div>
 
           {/* 詳細資訊 */}
