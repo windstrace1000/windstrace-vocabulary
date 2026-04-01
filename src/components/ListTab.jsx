@@ -33,7 +33,7 @@ export default function ListTab({ vocabulary, onSearch, onDeleteWord }) {
         <h2 className="text-xl font-bold text-slate-800 flex-shrink-0">我的單字本 ({savedWords.length})</h2>
 
         {savedWords.length > 0 && (
-          <div className="flex flex-col gap-3 w-full lg:w-3/4 xl:w-auto mt-2 xl:mt-0">
+          <div className="flex flex-col gap-3 w-full lg:w-3/4 xl:w-auto mt-2 xl:mt-0 flex-1 ml-0 xl:ml-auto max-w-2xl">
             {/* 第一列：搜尋 (搜尋單字欄位) */}
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -46,13 +46,13 @@ export default function ListTab({ vocabulary, onSearch, onDeleteWord }) {
               />
             </div>
 
-            {/* 第二列：分類的下拉式選單 (包含第二層) */}
-            <div className="flex flex-col sm:flex-row gap-2 w-full">
+            {/* 第二列：分類的下拉式選單 (強制同一列) */}
+            <div className="flex flex-row gap-2 w-full">
               {/* 大分類篩選器 */}
               <select
                 value={categoryTypeFilter}
                 onChange={(e) => setCategoryTypeFilter(e.target.value)}
-                className="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer flex-1 min-w-[120px] shadow-sm"
+                className="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl px-2 sm:px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer flex-1 min-w-0 shadow-sm"
               >
                 <option value="all">所有分類</option>
                 <option value="textbook">📖 課本</option>
@@ -65,7 +65,7 @@ export default function ListTab({ vocabulary, onSearch, onDeleteWord }) {
                 <select
                   value={subCategoryFilter}
                   onChange={(e) => setSubCategoryFilter(e.target.value)}
-                  className="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer flex-1 min-w-[120px] shadow-sm animate-in fade-in slide-in-from-left-2"
+                  className="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl px-2 sm:px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer flex-1 min-w-0 shadow-sm animate-in fade-in slide-in-from-left-2"
                 >
                   <option value="all">所有{categoryTypeFilter === 'textbook' ? '課本' : '雜誌'}</option>
                   {uniqueCategoryList
@@ -78,8 +78,9 @@ export default function ListTab({ vocabulary, onSearch, onDeleteWord }) {
             </div>
 
             {/* 第三列：排序與檢視切換 */}
-            <div className="flex flex-row justify-between sm:justify-start items-center gap-2 w-full">
-              <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500 transition-all flex-1 sm:flex-none shadow-sm h-10">
+            <div className="flex flex-row justify-between items-center gap-2 w-full">
+              {/* 排序方式 */}
+              <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500 transition-all flex-1 min-w-0 shadow-sm h-[44px]">
                 <ArrowUpDown className="w-4 h-4 text-slate-400 shrink-0" />
                 <select
                   value={sortBy}
@@ -87,7 +88,7 @@ export default function ListTab({ vocabulary, onSearch, onDeleteWord }) {
                     setSortBy(e.target.value);
                     if (e.target.value.startsWith('alpha')) setIsGrouped(false);
                   }}
-                  className="bg-transparent text-slate-700 text-sm focus:outline-none cursor-pointer w-full"
+                  className="bg-transparent text-slate-700 text-sm focus:outline-none cursor-pointer w-full min-w-0 truncate"
                 >
                   <option value="date-desc">最新加入</option>
                   <option value="date-asc">最早加入</option>
@@ -97,32 +98,32 @@ export default function ListTab({ vocabulary, onSearch, onDeleteWord }) {
               </div>
 
               {/* 檢視模式切換 */}
-              <div className="flex bg-slate-200/50 p-1 rounded-xl shrink-0 items-center h-10 shadow-sm border border-slate-100">
+              <div className="flex bg-slate-200/50 p-1 rounded-xl shrink-0 items-center h-[44px] shadow-sm border border-slate-100">
                 <button
                   onClick={() => {
                     const nextGrouped = !isGrouped;
                     setIsGrouped(nextGrouped);
                     if (nextGrouped && !sortBy.startsWith('date')) setSortBy('date-desc');
                   }}
-                  className={`p-1.5 rounded-lg transition-all ${isGrouped ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                  className={`p-1.5 sm:p-2 rounded-lg transition-all ${isGrouped ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                   title="按日期分區塊"
                 >
-                  <CalendarDays className="w-4 h-4" />
+                  <CalendarDays className="w-[18px] h-[18px]" />
                 </button>
-                <div className="w-px h-4 bg-slate-300 mx-1"></div>
+                <div className="w-px h-5 bg-slate-300 mx-1"></div>
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                  className={`p-1.5 sm:p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                   title="網格檢視"
                 >
-                  <LayoutGrid className="w-4 h-4" />
+                  <LayoutGrid className="w-[18px] h-[18px]" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                  className={`p-1.5 sm:p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                   title="清單檢視"
                 >
-                  <List className="w-4 h-4" />
+                  <List className="w-[18px] h-[18px]" />
                 </button>
               </div>
             </div>
