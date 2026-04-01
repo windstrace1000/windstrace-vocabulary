@@ -146,8 +146,10 @@ export default function SettingsModal({ isOpen, onClose }) {
                 onChange={(e) => setModelInput(e.target.value)}
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all text-sm font-medium text-slate-700 cursor-pointer"
               >
+                <option value="gemini-3.1-flash-lite">⚡ Gemini 3.1 Flash Lite (最新省電版)</option>
                 <option value="gemini-3-flash-preview">🌟 Gemini 3 Flash 預覽版 (最快最聰明)</option>
                 <option value="gemini-2.5-flash">Gemini 2.5 Flash 穩定版</option>
+                <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (輕量版)</option>
               </select>
             </div>
             

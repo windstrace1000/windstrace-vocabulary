@@ -22,8 +22,10 @@ const DEFAULT_MODEL = 'gemini-3-flash-preview';
 
 export const getGeminiModel = () => {
   const model = localStorage.getItem(API_MODEL_STORAGE);
-  if (model === 'gemini-3.0-flash-preview') return 'gemini-3-flash-preview';
-  if (model === 'gemini-2.5-flash-preview-04-17') return 'gemini-2.5-flash';
+  if (model === 'gemini-3.0-flash-preview' || model === 'gemini-3-flash') return 'gemini-3-flash-preview';
+  if (model === 'gemini-2.5-flash-preview-04-17' || model === 'gemini-2.5-flash') return 'gemini-2.5-flash';
+  if (model === 'gemini-3.1-flash-lite') return 'gemini-3.1-flash-lite';
+  if (model === 'gemini-2.5-flash-lite') return 'gemini-2.5-flash-lite';
   return model || DEFAULT_MODEL;
 };
 
