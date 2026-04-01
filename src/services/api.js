@@ -56,6 +56,20 @@ export const ocrImage = async (imageBase64) => {
     throw new Error('請先在設定中輸入您的 Gemini API Key');
   }
 
+  const response = await fetch(`${API_BASE}/ocr`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Gemini-Api-Key': apiKey
+    },
+    body: JSON.stringify({ image: imageBase64, model }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || 'OCR 識別失敗');
+  }
+
   return response.json();
 };
 
