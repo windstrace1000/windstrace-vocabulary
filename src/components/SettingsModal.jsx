@@ -99,10 +99,10 @@ export default function SettingsModal({ isOpen, onClose }) {
       <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
         
         {/* Header */}
-        <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100 shrink-0">
+        <div className="flex justify-between items-center px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-2 text-slate-800">
             <Key className="w-5 h-5 text-indigo-600" />
-            <h3 className="text-xl font-bold">系統設定</h3>
+            <h3 className="text-lg sm:text-xl font-bold">系統設定</h3>
           </div>
           <button onClick={onClose} className="p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded-xl transition-colors">
             <X className="w-5 h-5" />
@@ -110,7 +110,7 @@ export default function SettingsModal({ isOpen, onClose }) {
         </div>
         
         {/* Body */}
-        <div className="p-6 overflow-y-auto space-y-8">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-8">
           
           {/* AI 設定區 */}
           <section className="space-y-4">
@@ -170,28 +170,28 @@ export default function SettingsModal({ isOpen, onClose }) {
                 <label className="flex items-center gap-1.5 text-sm font-bold text-indigo-800">
                   <Smartphone className="w-4 h-4" /> 自定義同步 ID (帳號代碼)
                 </label>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5 sm:gap-2 flex-nowrap items-center">
                   <input
                     type="text"
                     value={userIdInput}
                     onChange={(e) => setUserIdInput(e.target.value)}
-                    placeholder="輸入自定義名稱，例如: myword123"
-                    className="flex-1 px-4 py-3 bg-white border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all text-base font-mono font-bold text-indigo-700 shadow-sm"
+                    placeholder="例如: myword123"
+                    className="flex-1 min-w-0 px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all text-sm sm:text-base font-mono font-bold text-indigo-700 shadow-sm"
                   />
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 flex-shrink-0">
                     <button 
                       onClick={copyToClipboard}
-                      className="p-3 bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all shadow-sm active:scale-95"
+                      className="p-2 sm:p-3 bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all shadow-sm active:scale-95"
                       title="複製 ID"
                     >
-                      {showCopySuccess ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
+                      {showCopySuccess ? <Check className="w-4 h-4 sm:w-5 h-5 text-green-500" /> : <Copy className="w-4 h-4 sm:w-5 h-5" />}
                     </button>
                     <button 
                       onClick={generateRandomId}
-                      className="p-3 bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all shadow-sm active:scale-95"
+                      className="p-2 sm:p-3 bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all shadow-sm active:scale-95"
                       title="隨機產生"
                     >
-                      <RotateCw className="w-5 h-5" />
+                      <RotateCw className="w-4 h-4 sm:w-5 h-5" />
                     </button>
                   </div>
                 </div>
@@ -215,19 +215,19 @@ export default function SettingsModal({ isOpen, onClose }) {
               <label className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
                 <Book className="w-4 h-4 text-indigo-500" /> 課本版本選項
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 sm:gap-2 flex-nowrap items-center">
                 <input
                   type="text"
                   value={newTextbook}
                   onChange={(e) => setNewTextbook(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addCategory('textbook')}
                   placeholder="新增版本 (例如：三民)"
-                  className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
+                  className="flex-1 min-w-0 px-3 sm:px-4 py-2 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-xs sm:text-sm"
                 />
                 <button
                   onClick={() => addCategory('textbook')}
                   disabled={!newTextbook.trim()}
-                  className="px-4 py-2.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl transition-colors disabled:opacity-50"
+                  className="p-2 sm:px-4 sm:py-2.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl transition-colors disabled:opacity-50 flex-shrink-0"
                 >
                   <Plus className="w-5 h-5" />
                 </button>
@@ -249,19 +249,19 @@ export default function SettingsModal({ isOpen, onClose }) {
               <label className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
                 <Newspaper className="w-4 h-4 text-indigo-500" /> 雜誌品牌選項
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 sm:gap-2 flex-nowrap items-center">
                 <input
                   type="text"
                   value={newMagazine}
                   onChange={(e) => setNewMagazine(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addCategory('magazine')}
                   placeholder="新增雜誌 (例如：常春藤)"
-                  className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
+                  className="flex-1 min-w-0 px-3 sm:px-4 py-2 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-xs sm:text-sm"
                 />
                 <button
                   onClick={() => addCategory('magazine')}
                   disabled={!newMagazine.trim()}
-                  className="px-4 py-2.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl transition-colors disabled:opacity-50"
+                  className="p-2 sm:px-4 sm:py-2.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl transition-colors disabled:opacity-50 flex-shrink-0"
                 >
                   <Plus className="w-5 h-5" />
                 </button>
@@ -283,21 +283,21 @@ export default function SettingsModal({ isOpen, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 shrink-0 bg-slate-50 rounded-b-2xl">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-100 flex justify-end gap-2 sm:gap-3 shrink-0 bg-slate-50 rounded-b-2xl">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 text-slate-600 hover:bg-slate-200 rounded-xl font-medium transition-colors"
+            className="flex-1 sm:flex-none px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base text-slate-600 hover:bg-slate-200 rounded-xl font-medium transition-colors"
           >
             取消
           </button>
           <button
             onClick={handleSave}
-            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors flex items-center gap-2"
+            className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm sm:text-base font-medium transition-colors flex items-center justify-center gap-2"
           >
             {saveSuccess ? (
-              <><ShieldCheck className="w-4 h-4" /> 已儲存</>
+              <><ShieldCheck className="w-4 h-4" /> <span className="whitespace-nowrap">已儲存</span></>
             ) : (
-              '儲存設定'
+              <span className="whitespace-nowrap">儲存設定</span>
             )}
           </button>
         </div>

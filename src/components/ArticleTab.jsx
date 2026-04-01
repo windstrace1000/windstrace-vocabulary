@@ -448,20 +448,21 @@ export default function ArticleTab({ onSearch, savedWords, onSaveWord, searchRes
       {mode === 'display' && (
         <div className="space-y-4">
           {/* 工具列 */}
-          <div className="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <FileText className="w-5 h-5 text-indigo-600" />
+          <div className="bg-white px-4 sm:px-6 py-3 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap justify-between items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <FileText className="w-5 h-5 text-indigo-600 flex-shrink-0" />
               <span className="text-sm font-medium text-slate-600">
                 共 {articleText.split(/\s+/).filter(w => /[a-zA-Z]/.test(w)).length} 個英文單字
               </span>
-              <span className="text-xs text-slate-400">｜ 點擊任意單字查詢</span>
+              <span className="hidden sm:inline text-xs text-slate-400">｜ 點擊任意單字查詢</span>
             </div>
             <button
               onClick={resetAll}
-              className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors ml-auto sm:ml-0"
             >
               <RotateCcw className="w-4 h-4" />
               <span className="hidden sm:inline">重新選擇</span>
+              <span className="sm:hidden text-xs">重選</span>
             </button>
           </div>
 
@@ -476,10 +477,10 @@ export default function ArticleTab({ onSearch, savedWords, onSaveWord, searchRes
             {/* 單字查詢彈出視窗 */}
             {selectedWord && wordPopupPosition && (
               <div
-                className="absolute z-20 w-72 animate-in fade-in zoom-in-95 duration-200"
+                className="absolute z-20 w-[90vw] sm:w-72 max-w-sm animate-in fade-in zoom-in-95 duration-200"
                 style={{
                   top: `${wordPopupPosition.top}px`,
-                  left: `${Math.min(wordPopupPosition.left, (articleRef.current?.clientWidth || 300) - 300)}px`,
+                  left: `${Math.max(4, Math.min(wordPopupPosition.left, (articleRef.current?.clientWidth || 300) - (window.innerWidth < 640 ? window.innerWidth * 0.9 : 288) - 4))}px`,
                 }}
               >
                 {/* 三角箭頭 */}

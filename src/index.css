@@ -26,7 +26,26 @@
   background: #94a3b8;
 }
 
-/* 平滑全域過渡 */
+/* 平滑全域過渡與防止溢出 */
 * {
   -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+body {
+  overflow-x: hidden;
+  position: relative;
+  width: 100%;
+}
+
+/* 防止長單字撐開容器 */
+.break-words {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* 確保圖片與影片不溢出 */
+img, video, canvas {
+  max-width: 100%;
+  height: auto;
 }

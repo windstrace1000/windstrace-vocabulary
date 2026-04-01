@@ -73,36 +73,36 @@ export default function SearchTab({
       {searchResult && (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           {/* 標題區 */}
-          <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-white flex justify-between items-start">
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <h3 className="text-3xl font-extrabold text-slate-900">{searchResult.word}</h3>
+          <div className="p-4 sm:p-6 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-white flex flex-nowrap justify-between items-start gap-2 sm:gap-4 overflow-hidden rounded-t-2xl">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-3 mb-1">
+                <h3 className="text-xl sm:text-3xl font-extrabold text-slate-900 truncate">{searchResult.word}</h3>
                 <button
                   onClick={() => playAudio(searchResult.word)}
-                  className="p-2 text-indigo-600 hover:bg-indigo-100 rounded-full transition-colors"
+                  className="p-1.5 sm:p-2 text-indigo-600 hover:bg-indigo-100 rounded-full transition-colors flex-shrink-0"
                   title="聆聽發音"
                 >
-                  <Volume2 className="w-6 h-6" />
+                  <Volume2 className="w-5 h-5 sm:w-6 h-6" />
                 </button>
               </div>
-              <div className="flex items-center gap-2 text-lg">
-                <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded-md">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-lg flex-wrap">
+                <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-indigo-100 text-indigo-700 text-[10px] sm:text-sm font-semibold rounded-md flex-shrink-0">
                   {searchResult.partOfSpeech}
                 </span>
-                <span className="text-slate-700 font-medium">{searchResult.translation}</span>
+                <span className="text-slate-700 font-medium text-sm sm:text-lg truncate">{searchResult.translation}</span>
               </div>
             </div>
 
             <button
               onClick={() => setIsCategoryModalOpen(true)}
-              className={`flex items-center gap-1 text-sm font-medium px-4 py-2 rounded-lg transition-colors ${
+              className={`flex items-center justify-center gap-1 text-[10px] sm:text-sm font-medium px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-lg transition-colors flex-shrink-0 ml-auto ${
                 isWordSaved 
                   ? 'text-emerald-700 bg-emerald-100 hover:bg-emerald-200' 
                   : 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100'
               }`}
             >
-              {isWordSaved ? <BookmarkCheck className="w-5 h-5" /> : <BookmarkPlus className="w-5 h-5" />}
-              <span className="hidden sm:inline">{isWordSaved ? '+ 加入其他分類' : '記下來'}</span>
+              {isWordSaved ? <BookmarkCheck className="w-4 h-4 sm:w-5 h-5" /> : <BookmarkPlus className="w-4 h-4 sm:w-5 h-5" />}
+              <span>{isWordSaved ? (window.innerWidth < 640 ? '加分類' : '+ 加入其他分類') : '記下來'}</span>
             </button>
           </div>
 
