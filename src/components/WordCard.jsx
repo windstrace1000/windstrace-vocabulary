@@ -43,18 +43,40 @@ export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onC
           {/* 標題區 */}
           <div className="p-4 sm:p-6 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-white flex flex-nowrap justify-between items-start gap-2 sm:gap-4 rounded-t-2xl overflow-hidden">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 sm:gap-3 mb-1">
-                <h3 className="text-xl sm:text-3xl font-extrabold text-slate-900 truncate">{wordData.word}</h3>
-                <button onClick={() => playAudio(wordData.word)} className="p-1.5 sm:p-2 text-indigo-600 hover:bg-indigo-100 rounded-full transition-colors flex-shrink-0">
+              <div className="flex items-start gap-2 sm:gap-3 mb-1">
+                <h3 className="text-xl sm:text-3xl font-extrabold text-slate-900 break-words leading-tight">{wordData.word}</h3>
+                <button onClick={() => playAudio(wordData.word)} className="p-1.5 sm:p-2 text-indigo-600 hover:bg-indigo-100 rounded-full transition-colors flex-shrink-0 mt-0.5 sm:mt-1">
                   <Volume2 className="w-5 h-5 sm:w-6 h-6" />
                 </button>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2 text-lg flex-wrap">
-                <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-indigo-100 text-indigo-700 text-[10px] sm:text-sm font-semibold rounded-md flex-shrink-0">{wordData.partOfSpeech}</span>
+                <span className={`px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-sm font-semibold rounded-md flex-shrink-0 ${
+                  (wordData.partOfSpeech?.toLowerCase() === 'phrase' || wordData.partOfSpeech === '片語')
+                  ? 'bg-purple-100 text-purple-700' 
+                  : 'bg-indigo-100 text-indigo-700'
+                }`}>
+                  {(() => {
+                    const pos = wordData.partOfSpeech?.toLowerCase();
+                    const mapping = {
+                      'phrase': '片語',
+                      'n.': '名詞', 'n': '名詞', 'noun': '名詞',
+                      'v.': '動詞', 'v': '動詞', 'verb': '動詞',
+                      'adj.': '形容詞', 'adj': '形容詞', 'adjective': '形容詞',
+                      'adv.': '副詞', 'adv': '副詞', 'adverb': '副詞',
+                      'prep.': '介系詞', 'prep': '介系詞', 'preposition': '介系詞',
+                      'conj.': '連接詞', 'conj': '連接詞', 'conjunction': '連接詞',
+                      'pron.': '代名詞', 'pron': '代名詞', 'pronoun': '代名詞',
+                      'art.': '冠詞', 'art': '冠詞', 'article': '冠詞',
+                      'int.': '感嘆詞', 'int': '感嘆詞', 'interjection': '感嘆詞',
+                      'aux.': '助動詞', 'aux': '助動詞', 'auxiliary': '助動詞',
+                    };
+                    return mapping[pos] || wordData.partOfSpeech;
+                  })()}
+                </span>
                 {(wordData.categories || []).map((cat, idx) => (
                   <span key={idx} className="shrink-0 scale-90 sm:scale-100 origin-left">{renderCategoryBadge(cat)}</span>
                 ))}
-                <span className="text-slate-700 font-medium text-sm sm:text-lg truncate">{wordData.translation}</span>
+                <span className="text-slate-700 font-medium text-sm sm:text-lg break-words">{wordData.translation}</span>
               </div>
             </div>
             <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 flex-nowrap">
@@ -140,7 +162,29 @@ export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onC
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate leading-tight">{wordData.word}</h3>
             <div className="flex flex-wrap gap-1 mt-1">
-              <span className="text-xs font-semibold px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded flex-shrink-0">{wordData.partOfSpeech}</span>
+              <span className={`text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded flex-shrink-0 ${
+                (wordData.partOfSpeech?.toLowerCase() === 'phrase' || wordData.partOfSpeech === '片語')
+                ? 'bg-purple-50 text-purple-600'
+                : 'bg-indigo-50 text-indigo-600'
+              }`}>
+                {(() => {
+                  const pos = wordData.partOfSpeech?.toLowerCase();
+                  const mapping = {
+                    'phrase': '片語',
+                    'n.': '名詞', 'n': '名詞', 'noun': '名詞',
+                    'v.': '動詞', 'v': '動詞', 'verb': '動詞',
+                    'adj.': '形容詞', 'adj': '形容詞', 'adjective': '形容詞',
+                    'adv.': '副詞', 'adv': '副詞', 'adverb': '副詞',
+                    'prep.': '介系詞', 'prep': '介系詞', 'preposition': '介系詞',
+                    'conj.': '連接詞', 'conj': '連接詞', 'conjunction': '連接詞',
+                    'pron.': '代名詞', 'pron': '代名詞', 'pronoun': '代名詞',
+                    'art.': '冠詞', 'art': '冠詞', 'article': '冠詞',
+                    'int.': '感嘆詞', 'int': '感嘆詞', 'interjection': '感嘆詞',
+                    'aux.': '助動詞', 'aux': '助動詞', 'auxiliary': '助動詞',
+                  };
+                  return mapping[pos] || wordData.partOfSpeech;
+                })()}
+              </span>
               {(wordData.categories || []).map((cat, idx) => (
                 <span key={idx} className="shrink-0">{renderCategoryBadge(cat)}</span>
               ))}
@@ -171,7 +215,29 @@ export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onC
           </div>
         </div>
         <div className="hidden sm:block flex-shrink-0 w-20">
-          <span className="text-xs font-semibold px-2 py-1 bg-indigo-50 text-indigo-600 rounded">{wordData.partOfSpeech}</span>
+          <span className={`text-[10px] sm:text-xs font-semibold px-2 py-1 rounded ${
+            (wordData.partOfSpeech?.toLowerCase() === 'phrase' || wordData.partOfSpeech === '片語')
+            ? 'bg-purple-50 text-purple-600'
+            : 'bg-indigo-50 text-indigo-600'
+          }`}>
+            {(() => {
+              const pos = wordData.partOfSpeech?.toLowerCase();
+              const mapping = {
+                'phrase': '片語',
+                'n.': '名詞', 'n': '名詞', 'noun': '名詞',
+                'v.': '動詞', 'v': '動詞', 'verb': '動詞',
+                'adj.': '形容詞', 'adj': '形容詞', 'adjective': '形容詞',
+                'adv.': '副詞', 'adv': '副詞', 'adverb': '副詞',
+                'prep.': '介系詞', 'prep': '介系詞', 'preposition': '介系詞',
+                'conj.': '連接詞', 'conj': '連接詞', 'conjunction': '連接詞',
+                'pron.': '代名詞', 'pron': '代名詞', 'pronoun': '代名詞',
+                'art.': '冠詞', 'art': '冠詞', 'article': '冠詞',
+                'int.': '感嘆詞', 'int': '感嘆詞', 'interjection': '感嘆詞',
+                'aux.': '助動詞', 'aux': '助動詞', 'auxiliary': '助動詞',
+              };
+              return mapping[pos] || wordData.partOfSpeech;
+            })()}
+          </span>
         </div>
         <div className="flex-1 truncate text-slate-700 font-medium text-sm sm:text-base">
           {wordData.translation}

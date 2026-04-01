@@ -23,12 +23,13 @@ export async function onRequestPost(context) {
     const aiModel = model || 'gemini-3-flash-preview'; 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${aiModel}:generateContent?key=${apiKey}`;
 
-    // === 全域快取：先檢查資料庫是否已經有這個單字的紀錄 ===
+    // === 全域快取：先檢查資料庫是否已經有這個單字或片語的紀錄 ===
     if (env.DB) {
       try {
+        const cleanWord = word.trim().toLowerCase();
         const { results } = await env.DB.prepare(
           'SELECT * FROM vocabulary WHERE word = ? LIMIT 1'
-        ).bind(word.trim().toLowerCase()).all();
+        ).bind(cleanWord).all();
         
         if (results && results.length > 0) {
           const row = results[0];
@@ -43,18 +44,20 @@ export async function onRequestPost(context) {
           });
         }
       } catch (dbError) {
-        console.error('資料庫快取查詢錯誤:', dbError);
+        console.error('資料庫快取查詢內容:', dbError);
         // 若查詢失敗則繼續透過 Gemini API 查詢，不中斷流程
       }
     }
     // ===============================================
 
-    const prompt = `請以專業英文老師的角色分析英文單字 "${word.trim()}"。提供它的繁體中文翻譯、主要詞性、相關詞形變化（例如：過去式、現在分詞、複數、名詞型態、形容詞型態、副詞型態等，請盡量提供相關衍生字）、拼寫相似或容易混淆的單字（形似字），以及一個實用的英文例句和例句翻譯。`;
+    const prompt = `請以專業英文老師的角色分析英文單字或片語 "${word.trim()}"。
+若查詢的是一個英文單字，請提供它的繁體中文翻譯、以及主要的詞性（請使用繁體中文，例如：名詞、動詞、形容詞、副詞、介系詞、代名詞、連接詞、感嘆詞、助動詞等，**不要使用英文縮寫**）、相關詞形變化（衍生字）、拼寫相似或容易混淆的單字（形似字），以及一個實用的英文例句和翻譯。
+若查詢的是一個英文片語（或短句），請提供它的繁體中文翻譯，將詞性 (partOfSpeech) 標記為 "片語"，相關詞形變化與形似字可以留空，並提供一個實用的英文例句和翻譯。`;
 
     const payload = {
       contents: [{ parts: [{ text: prompt }] }],
       systemInstruction: {
-        parts: [{ text: "你是一個嚴謹的英文老師，請務必完全依照要求的 JSON 格式回傳，不要包含任何 Markdown 標籤或其他多餘文字。" }]
+        parts: [{ text: "你是一個嚴謹的英文老師，請務必完全依照要求的 JSON 格式回傳。所有詞性標記 (partOfSpeech) 必須使用繁體中文（如：名詞、動詞、形容詞等），嚴禁使用英文縮寫 (n, v, adj...)。" }]
       },
       generationConfig: {
         responseMimeType: "application/json",
@@ -63,10 +66,10 @@ export async function onRequestPost(context) {
           properties: {
             word: { type: "STRING" },
             translation: { type: "STRING" },
-            partOfSpeech: { type: "STRING" },
+            partOfSpeech: { type: "STRING", description: "請填入繁體中文詞性，例如：名詞、動詞、形容詞、副詞、片語等。" },
             relatedForms: {
               type: "ARRAY",
-              description: "相關字詞或詞性變化",
+              description: "相關字詞或詞性變化（若是片語則可留空）",
               items: {
                 type: "OBJECT",
                 properties: {
@@ -77,7 +80,7 @@ export async function onRequestPost(context) {
             },
             similarWords: {
               type: "ARRAY",
-              description: "拼寫相似或容易混淆的單字（形似字）",
+              description: "拼寫相似或容易混淆的單字（若是片語則可留空）",
               items: {
                 type: "OBJECT",
                 properties: {

@@ -75,21 +75,41 @@ export default function SearchTab({
           {/* 標題區 */}
           <div className="p-4 sm:p-6 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-white flex flex-nowrap justify-between items-start gap-2 sm:gap-4 overflow-hidden rounded-t-2xl">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 sm:gap-3 mb-1">
-                <h3 className="text-xl sm:text-3xl font-extrabold text-slate-900 truncate">{searchResult.word}</h3>
+              <div className="flex items-start gap-2 sm:gap-3 mb-1">
+                <h3 className="text-xl sm:text-3xl font-extrabold text-slate-900 break-words leading-tight">{searchResult.word}</h3>
                 <button
                   onClick={() => playAudio(searchResult.word)}
-                  className="p-1.5 sm:p-2 text-indigo-600 hover:bg-indigo-100 rounded-full transition-colors flex-shrink-0"
+                  className="p-1.5 sm:p-2 text-indigo-600 hover:bg-indigo-100 rounded-full transition-colors flex-shrink-0 mt-0.5 sm:mt-1"
                   title="聆聽發音"
                 >
                   <Volume2 className="w-5 h-5 sm:w-6 h-6" />
                 </button>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2 text-lg flex-wrap">
-                <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-indigo-100 text-indigo-700 text-[10px] sm:text-sm font-semibold rounded-md flex-shrink-0">
-                  {searchResult.partOfSpeech}
+                <span className={`px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-sm font-semibold rounded-md flex-shrink-0 ${
+                  (searchResult.partOfSpeech?.toLowerCase() === 'phrase' || searchResult.partOfSpeech === '片語')
+                  ? 'bg-purple-100 text-purple-700'
+                  : 'bg-indigo-100 text-indigo-700'
+                }`}>
+                  {(() => {
+                    const pos = searchResult.partOfSpeech?.toLowerCase();
+                    const mapping = {
+                      'phrase': '片語',
+                      'n.': '名詞', 'n': '名詞', 'noun': '名詞',
+                      'v.': '動詞', 'v': '動詞', 'verb': '動詞',
+                      'adj.': '形容詞', 'adj': '形容詞', 'adjective': '形容詞',
+                      'adv.': '副詞', 'adv': '副詞', 'adverb': '副詞',
+                      'prep.': '介系詞', 'prep': '介系詞', 'preposition': '介系詞',
+                      'conj.': '連接詞', 'conj': '連接詞', 'conjunction': '連接詞',
+                      'pron.': '代名詞', 'pron': '代名詞', 'pronoun': '代名詞',
+                      'art.': '冠詞', 'art': '冠詞', 'article': '冠詞',
+                      'int.': '感嘆詞', 'int': '感嘆詞', 'interjection': '感嘆詞',
+                      'aux.': '助動詞', 'aux': '助動詞', 'auxiliary': '助動詞',
+                    };
+                    return mapping[pos] || searchResult.partOfSpeech;
+                  })()}
                 </span>
-                <span className="text-slate-700 font-medium text-sm sm:text-lg truncate">{searchResult.translation}</span>
+                <span className="text-slate-700 font-medium text-sm sm:text-lg break-words">{searchResult.translation}</span>
               </div>
             </div>
 
