@@ -56,18 +56,32 @@ export const ocrImage = async (imageBase64) => {
     throw new Error('請先在設定中輸入您的 Gemini API Key');
   }
 
-  const response = await fetch(`${API_BASE}/ocr`, {
+  return response.json();
+};
+
+/**
+ * 分析文章中的重點單字與片語
+ */
+export const analyzeArticle = async (text) => {
+  const apiKey = getGeminiApiKey();
+  const model = getGeminiModel();
+
+  if (!apiKey) {
+    throw new Error('請先在設定中輸入您的 Gemini API Key');
+  }
+
+  const response = await fetch(`${API_BASE}/analyze`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'X-Gemini-Api-Key': apiKey
     },
-    body: JSON.stringify({ image: imageBase64, model }),
+    body: JSON.stringify({ text, model }),
   });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.error || 'OCR 識別失敗');
+    throw new Error(error.error || '分析失敗');
   }
 
   return response.json();

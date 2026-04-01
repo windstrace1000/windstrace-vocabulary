@@ -4,9 +4,9 @@
 // ==========================================
 
 import { useState, useRef, useCallback } from 'react';
-import { FileText, Camera, Loader2, X, RotateCcw, Volume2, BookmarkPlus, BookmarkCheck, Clipboard, ImagePlus } from 'lucide-react';
+import { FileText, Camera, Loader2, X, RotateCcw, Volume2, BookmarkPlus, BookmarkCheck, Clipboard, ImagePlus, Sparkles } from 'lucide-react';
 import { playAudio } from '../utils/audio';
-import { ocrImage } from '../services/api';
+import { ocrImage, analyzeArticle } from '../services/api';
 import ChooseCategoryModal from './ChooseCategoryModal';
 
 export default function ArticleTab({ onSearch, savedWords, onSaveWord, searchResult, isSearching }) {
@@ -19,6 +19,10 @@ export default function ArticleTab({ onSearch, savedWords, onSaveWord, searchRes
   const [selectedWord, setSelectedWord] = useState(null);
   const [wordPopupPosition, setWordPopupPosition] = useState(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
+  // AI 文章分析相關狀態
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [highlights, setHighlights] = useState([]);
 
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
@@ -136,6 +140,20 @@ export default function ArticleTab({ onSearch, savedWords, onSaveWord, searchRes
     }
   }, []);
 
+  // 文章分析
+  const handleAnalyze = useCallback(async () => {
+    if (!articleText || isAnalyzing) return;
+    setIsAnalyzing(true);
+    try {
+      const results = await analyzeArticle(articleText);
+      setHighlights(results);
+    } catch (error) {
+      console.error('分析失敗:', error);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [articleText, isAnalyzing]);
+
   // 重置所有狀態
   const resetAll = useCallback(() => {
     stopCamera();
@@ -145,6 +163,8 @@ export default function ArticleTab({ onSearch, savedWords, onSaveWord, searchRes
     setSelectedWord(null);
     setWordPopupPosition(null);
     setOcrError('');
+    setHighlights([]);
+    setIsAnalyzing(false);
   }, [stopCamera]);
 
   // 處理單字點擊
@@ -449,13 +469,33 @@ export default function ArticleTab({ onSearch, savedWords, onSaveWord, searchRes
         <div className="space-y-4">
           {/* 工具列 */}
           <div className="bg-white px-4 sm:px-6 py-3 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap justify-between items-center gap-3">
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-              <FileText className="w-5 h-5 text-indigo-600 flex-shrink-0" />
-              <span className="text-sm font-medium text-slate-600">
-                共 {articleText.split(/\s+/).filter(w => /[a-zA-Z]/.test(w)).length} 個英文單字
-              </span>
-              <span className="hidden sm:inline text-xs text-slate-400">｜ 點擊任意單字查詢</span>
+            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+                <span className="text-sm font-medium text-slate-600">
+                  共 {articleText.split(/\s+/).filter(w => /[a-zA-Z]/.test(w)).length} 個單字
+                </span>
+              </div>
+              
+              <button
+                onClick={handleAnalyze}
+                disabled={isAnalyzing}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold transition-all shadow-sm ${
+                  isAnalyzing 
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
+                  : highlights.length > 0
+                    ? 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                    : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-100'
+                }`}
+              >
+                {isAnalyzing ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> 分析中...</>
+                ) : (
+                  <><Sparkles className="w-4 h-4" /> {highlights.length > 0 ? '重新分析' : 'AI 偵測片語'}</>
+                )}
+              </button>
             </div>
+
             <button
               onClick={resetAll}
               className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors ml-auto sm:ml-0"
@@ -465,6 +505,46 @@ export default function ArticleTab({ onSearch, savedWords, onSaveWord, searchRes
               <span className="sm:hidden text-xs">重選</span>
             </button>
           </div>
+
+          {/* AI 分析出的重點清單 */}
+          {highlights.length > 0 && (
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-4 rounded-2xl border border-purple-100 animate-in fade-in zoom-in-95">
+              <h4 className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" /> AI 老師推薦的學習內容 (含片語)
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {highlights.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={(e) => {
+                      if (item.type === 'word') {
+                        handleWordClick(item.originalText, e);
+                      } else {
+                        // 片語查詢特別處理
+                        setSelectedWord(item.originalText);
+                        onSearch(item.originalText);
+                        setWordPopupPosition({
+                          top: e.target.getBoundingClientRect().bottom - articleRef.current?.getBoundingClientRect().top + 8,
+                          left: Math.max(0, e.target.getBoundingClientRect().left - articleRef.current?.getBoundingClientRect().left + e.target.getBoundingClientRect().width / 2 - 140),
+                          word: item.originalText
+                        });
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm flex items-center gap-1 ${
+                      item.type === 'phrase'
+                      ? 'bg-white text-purple-600 border border-purple-200 hover:border-purple-400'
+                      : 'bg-white text-indigo-600 border border-indigo-200 hover:border-indigo-400'
+                    }`}
+                  >
+                    {item.type === 'phrase' && <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mr-0.5" />}
+                    {item.originalText}
+                    <span className="font-normal text-slate-400 mx-1">/</span>
+                    <span className="text-slate-600 truncate max-w-[120px]">{item.translation}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* 文章內容 */}
           <div
