@@ -26,6 +26,7 @@ export async function onRequestGet(context) {
       partOfSpeech: row.part_of_speech,
       relatedForms: JSON.parse(row.related_forms || '[]'),
       similarWords: JSON.parse(row.similar_words || '[]'),
+      relatedPhrases: JSON.parse(row.related_phrases || '[]'),
       exampleSentence: row.example_sentence,
       exampleTranslation: row.example_translation,
       category: row.category ? JSON.parse(row.category) : { type: 'lifestyle' },
@@ -45,7 +46,7 @@ export async function onRequestPost(context) {
 
   try {
     const body = await request.json();
-    const { userId, word, translation, partOfSpeech, relatedForms, similarWords, exampleSentence, exampleTranslation, category } = body;
+    const { userId, word, translation, partOfSpeech, relatedForms, similarWords, relatedPhrases, exampleSentence, exampleTranslation, category } = body;
 
     if (!userId || !word) {
       return Response.json({ error: '缺少必要欄位' }, { status: 400 });
@@ -56,8 +57,8 @@ export async function onRequestPost(context) {
 
     await env.DB.prepare(`
       INSERT OR REPLACE INTO vocabulary 
-        (user_id, word, translation, part_of_speech, related_forms, similar_words, example_sentence, example_translation, category, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (user_id, word, translation, part_of_speech, related_forms, similar_words, related_phrases, example_sentence, example_translation, category, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       userId,
       word.toLowerCase(),
@@ -65,6 +66,7 @@ export async function onRequestPost(context) {
       partOfSpeech || '',
       JSON.stringify(relatedForms || []),
       JSON.stringify(similarWords || []),
+      JSON.stringify(relatedPhrases || []),
       exampleSentence || '',
       exampleTranslation || '',
       categoryJson,

@@ -129,18 +129,44 @@ export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onC
 
             {wordData.similarWords?.length > 0 && (
               <div>
-                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">形似字 Similar Words</h4>
+                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">形似字 Similar</h4>
                 <div className="overflow-x-auto rounded-xl border border-slate-200">
-                  <table className="w-full text-left border-collapse">
-                    <thead><tr className="bg-slate-50 border-b border-slate-200"><th className="py-3 px-4 text-slate-500 font-medium w-1/3">單字</th><th className="py-3 px-4 text-slate-500 font-medium">意思</th></tr></thead>
+                  <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                    <thead><tr className="bg-slate-50 border-b border-slate-200"><th className="py-2.5 px-3 sm:px-4 text-slate-500 font-medium w-1/3">單字</th><th className="py-2.5 px-3 sm:px-4 text-slate-500 font-medium">意思</th></tr></thead>
                     <tbody>
                       {wordData.similarWords.map((sim, idx) => (
                         <tr key={idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50">
-                          <td className="py-3 px-4 font-medium text-indigo-700 flex items-center justify-between">
-                            <button onClick={() => onSearch(sim.word)} className="hover:underline hover:text-indigo-800 text-left transition-colors">{sim.word}</button>
-                            <button onClick={() => playAudio(sim.word)} className="text-slate-400 hover:text-indigo-600 p-1"><Volume2 className="w-4 h-4" /></button>
+                          <td className="py-2.5 px-3 sm:px-4 font-medium text-indigo-700">
+                            <div className="flex items-center justify-between gap-1">
+                              <button onClick={() => onSearch(sim.word)} className="hover:underline hover:text-indigo-800 text-left transition-colors truncate">{sim.word}</button>
+                              <button onClick={() => playAudio(sim.word)} className="text-slate-400 hover:text-indigo-600 p-1 flex-shrink-0"><Volume2 className="w-3.5 h-3.5 sm:w-4 h-4" /></button>
+                            </div>
                           </td>
-                          <td className="py-3 px-4 text-slate-700">{sim.meaning}</td>
+                          <td className="py-2.5 px-3 sm:px-4 text-slate-700">{sim.meaning}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {wordData.relatedPhrases?.length > 0 && (
+              <div>
+                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">相關片語 Phrases</h4>
+                <div className="overflow-x-auto rounded-xl border border-slate-200">
+                  <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                    <thead><tr className="bg-slate-50 border-b border-slate-200"><th className="py-2.5 px-3 sm:px-4 text-slate-500 font-medium w-1/2">片語</th><th className="py-2.5 px-3 sm:px-4 text-slate-500 font-medium">意思</th></tr></thead>
+                    <tbody>
+                      {wordData.relatedPhrases.map((item, idx) => (
+                        <tr key={idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50">
+                          <td className="py-2.5 px-3 sm:px-4 font-medium text-indigo-700">
+                            <div className="flex items-center justify-between gap-1">
+                              <button onClick={() => onSearch(item.phrase)} className="hover:underline hover:text-indigo-800 text-left transition-colors break-words">{item.phrase}</button>
+                              <button onClick={() => playAudio(item.phrase)} className="text-slate-400 hover:text-indigo-600 p-1 flex-shrink-0"><Volume2 className="w-3.5 h-3.5 sm:w-4 h-4" /></button>
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3 sm:px-4 text-slate-700">{item.meaning}</td>
                         </tr>
                       ))}
                     </tbody>
