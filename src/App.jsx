@@ -4,11 +4,12 @@
 // ==========================================
 
 import { useState, useMemo, useCallback } from 'react';
-import { Search, BookOpen, BrainCircuit } from 'lucide-react';
+import { Search, BookOpen, BrainCircuit, FileText } from 'lucide-react';
 import Header from './components/Header';
 import SearchTab from './components/SearchTab';
 import ListTab from './components/ListTab';
 import QuizTab from './components/QuizTab';
+import ArticleTab from './components/ArticleTab';
 import DeleteModal from './components/DeleteModal';
 import SettingsModal from './components/SettingsModal';
 import MobileTabButton from './components/MobileTabButton';
@@ -37,15 +38,18 @@ export default function App() {
   // 測驗 Hook (使用過濾後的單字，這樣就可以針對特定分類或詞性進行測驗)
   const quiz = useQuiz(vocabulary.processedWords);
 
-  // 查詢單字（可從任何頁面觸發，會自動切換到查詢頁）
-  const performSearch = useCallback(async (wordToSearch) => {
+  // 查詢單字（可從任何頁面觸發）
+  // 如果 switchTab 為 false，則不自動切換到查詢頁（用於文章閱讀模式）
+  const performSearch = useCallback(async (wordToSearch, { switchTab = true } = {}) => {
     if (!wordToSearch.trim()) return;
     
     const searchStr = wordToSearch.trim().toLowerCase();
     
-    setActiveTab('search');
+    if (switchTab) {
+      setActiveTab('search');
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { /* 忽略 */ }
+    }
     setSearchQuery(wordToSearch);
-    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { /* 忽略 */ }
     
     // 如果單字已經在單字本中，直接顯示結果，秒殺載入時間
     const existingWord = vocabulary.savedWords.find(w => w.word.toLowerCase() === searchStr);
@@ -68,6 +72,11 @@ export default function App() {
       setIsSearching(false);
     }
   }, [vocabulary.savedWords]);
+
+  // 文章閱讀模式專用查詢（不切換分頁）
+  const performArticleSearch = useCallback(async (wordToSearch) => {
+    return performSearch(wordToSearch, { switchTab: false });
+  }, [performSearch]);
 
   // 儲存單字
   const handleSaveWord = useCallback(async (wordData) => {
@@ -119,11 +128,21 @@ export default function App() {
         {activeTab === 'quiz' && (
           <QuizTab quiz={quiz} />
         )}
+        {activeTab === 'article' && (
+          <ArticleTab
+            onSearch={performArticleSearch}
+            savedWords={vocabulary.savedWords}
+            onSaveWord={handleSaveWord}
+            searchResult={searchResult}
+            isSearching={isSearching}
+          />
+        )}
       </main>
 
       {/* 底部導航（手機版） */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-2 pb-safe z-10">
         <MobileTabButton active={activeTab === 'search'} onClick={() => setActiveTab('search')} icon={<Search />} label="查詢" />
+        <MobileTabButton active={activeTab === 'article'} onClick={() => setActiveTab('article')} icon={<FileText />} label="閱讀" />
         <MobileTabButton active={activeTab === 'list'} onClick={() => setActiveTab('list')} icon={<BookOpen />} label="單字本" badge={vocabulary.savedWords.length} />
         <MobileTabButton active={activeTab === 'quiz'} onClick={() => setActiveTab('quiz')} icon={<BrainCircuit />} label="測驗" />
       </nav>
