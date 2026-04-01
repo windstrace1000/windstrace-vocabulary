@@ -3,15 +3,20 @@
 // ==========================================
 
 import { useState } from 'react';
-import { X, Key, ShieldCheck, AlertCircle, Cpu, Book, Newspaper, Plus, Trash2 } from 'lucide-react';
+import { X, Key, ShieldCheck, AlertCircle, Cpu, Book, Newspaper, Plus, Trash2, Smartphone, Copy, Check, RotateCw } from 'lucide-react';
 import { getGeminiApiKey, setGeminiApiKey, getGeminiModel, setGeminiModel } from '../utils/apiKey';
 import { getCategorySettings, saveCategorySettings } from '../utils/categories';
+import { getUserId, setUserId } from '../utils/userId';
 
 export default function SettingsModal({ isOpen, onClose }) {
   const [apiKeyInput, setApiKeyInput] = useState(getGeminiApiKey());
   const [modelInput, setModelInput] = useState(getGeminiModel());
   const [categories, setCategories] = useState(getCategorySettings());
   
+  const currentUserId = getUserId();
+  const [userIdInput, setUserIdInput] = useState(currentUserId);
+  const [showCopySuccess, setShowCopySuccess] = useState(false);
+
   // 新增輸入框狀態
   const [newTextbook, setNewTextbook] = useState('');
   const [newMagazine, setNewMagazine] = useState('');
@@ -24,11 +29,35 @@ export default function SettingsModal({ isOpen, onClose }) {
     setGeminiApiKey(apiKeyInput);
     setGeminiModel(modelInput);
     saveCategorySettings(categories);
+    
+    const idChanged = userIdInput.trim() !== currentUserId && userIdInput.trim() !== '';
+    if (idChanged) {
+      setUserId(userIdInput);
+    }
+
     setSaveSuccess(true);
     setTimeout(() => {
       setSaveSuccess(false);
       onClose();
+      if (idChanged) {
+        window.location.reload();
+      }
     }, 1500);
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(userIdInput);
+      setShowCopySuccess(true);
+      setTimeout(() => setShowCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('複製失敗:', err);
+    }
+  };
+
+  const generateRandomId = () => {
+    const newId = crypto.randomUUID().split('-')[0];
+    setUserIdInput(newId);
   };
 
   const addCategory = (type) => {
@@ -126,6 +155,51 @@ export default function SettingsModal({ isOpen, onClose }) {
               <AlertCircle className="w-5 h-5 flex-shrink-0 text-amber-600 mt-0.5" />
               <div className="leading-relaxed">
                 <p className="text-amber-700">API 金鑰僅會加密儲存在您的瀏覽器中。我們強烈建議為此金鑰設定適當的額度限制。</p>
+              </div>
+            </div>
+          </section>
+
+          <hr className="border-slate-100" />
+
+          {/* 跨裝置同步區 */}
+          <section className="space-y-4">
+            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider">跨裝置同步設定</h4>
+            
+            <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 space-y-4">
+              <div className="space-y-2">
+                <label className="flex items-center gap-1.5 text-sm font-bold text-indigo-800">
+                  <Smartphone className="w-4 h-4" /> 自定義同步 ID (帳號代碼)
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={userIdInput}
+                    onChange={(e) => setUserIdInput(e.target.value)}
+                    placeholder="輸入自定義名稱，例如: myword123"
+                    className="flex-1 px-4 py-3 bg-white border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all text-base font-mono font-bold text-indigo-700 shadow-sm"
+                  />
+                  <div className="flex gap-1">
+                    <button 
+                      onClick={copyToClipboard}
+                      className="p-3 bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all shadow-sm active:scale-95"
+                      title="複製 ID"
+                    >
+                      {showCopySuccess ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
+                    </button>
+                    <button 
+                      onClick={generateRandomId}
+                      className="p-3 bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all shadow-sm active:scale-95"
+                      title="隨機產生"
+                    >
+                      <RotateCw className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/50 rounded-xl p-4 text-xs text-slate-600 leading-relaxed border border-indigo-100/50">
+                <p className="font-semibold text-indigo-800 mb-1">📢 如何同步？</p>
+                <p>在其他裝置填入「同一個同步 ID」，按儲存後就會看到相同的單字本。 ID 本身就是識別證，請設定一組好記但不易被猜到的文字。</p>
               </div>
             </div>
           </section>
