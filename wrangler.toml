@@ -1,0 +1,16 @@
+# 單字記憶大師 - Cloudflare 設定
+# 部署前請執行以下步驟：
+# 1. npm run db:create  (建立 D1 資料庫)
+# 2. 將產生的 database_id 填入下方
+# 3. npx wrangler secret put GEMINI_API_KEY (設定 API 金鑰)
+# 4. npm run db:init (初始化資料庫 schema)
+# 5. npm run deploy (部署)
+
+name = "windstrace-vocabulary"
+compatibility_date = "2024-12-01"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "windstrace-vocabulary-DB"
+database_id = "f77adf81-1a80-4b66-aa4c-a58202118393"

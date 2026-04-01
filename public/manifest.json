@@ -1,0 +1,16 @@
+{
+  "name": "單字記憶大師",
+  "short_name": "單字大師",
+  "description": "AI 驅動的智慧英文單字學習與間隔測驗 APP",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ]
+}
