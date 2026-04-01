@@ -2,16 +2,25 @@
 // SearchTab 查詢頁面組件
 // ==========================================
 
+import { useState } from 'react';
 import { Search, Loader2, Volume2, BookmarkPlus, BookmarkCheck } from 'lucide-react';
 import { playAudio } from '../utils/audio';
+import ChooseCategoryModal from './ChooseCategoryModal';
 
 export default function SearchTab({
   searchQuery, setSearchQuery, searchResult, isSearching, searchError,
   savedWords, onSearch, onSaveWord
 }) {
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSearch(searchQuery);
+  };
+
+  const handleSaveWithCategory = (categoryData) => {
+    onSaveWord({ ...searchResult, category: categoryData });
+    setIsCategoryModalOpen(false);
   };
 
   const isWordSaved = searchResult && savedWords.some(
@@ -75,7 +84,7 @@ export default function SearchTab({
               </button>
             ) : (
               <button
-                onClick={() => onSaveWord(searchResult)}
+                onClick={() => setIsCategoryModalOpen(true)}
                 className="flex items-center gap-1 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition-colors"
               >
                 <BookmarkPlus className="w-5 h-5" />
@@ -166,6 +175,14 @@ export default function SearchTab({
           </div>
         </div>
       )}
+
+      {/* 分類選擇視窗 */}
+      <ChooseCategoryModal 
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        wordToSave={searchResult}
+        onConfirm={handleSaveWithCategory}
+      />
     </div>
   );
 }

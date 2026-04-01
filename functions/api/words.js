@@ -28,6 +28,7 @@ export async function onRequestGet(context) {
       similarWords: JSON.parse(row.similar_words || '[]'),
       exampleSentence: row.example_sentence,
       exampleTranslation: row.example_translation,
+      category: row.category ? JSON.parse(row.category) : { type: 'lifestyle' },
       createdAt: row.created_at,
     }));
 
@@ -44,16 +45,19 @@ export async function onRequestPost(context) {
 
   try {
     const body = await request.json();
-    const { userId, word, translation, partOfSpeech, relatedForms, similarWords, exampleSentence, exampleTranslation } = body;
+    const { userId, word, translation, partOfSpeech, relatedForms, similarWords, exampleSentence, exampleTranslation, category } = body;
 
     if (!userId || !word) {
       return Response.json({ error: '缺少必要欄位' }, { status: 400 });
     }
 
+    // 將分類序列化為 JSON，並未提供時預設為生活類
+    const categoryJson = JSON.stringify(category || { type: 'lifestyle' });
+
     await env.DB.prepare(`
       INSERT OR REPLACE INTO vocabulary 
-        (user_id, word, translation, part_of_speech, related_forms, similar_words, example_sentence, example_translation, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (user_id, word, translation, part_of_speech, related_forms, similar_words, example_sentence, example_translation, category, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       userId,
       word.toLowerCase(),
@@ -63,6 +67,7 @@ export async function onRequestPost(context) {
       JSON.stringify(similarWords || []),
       exampleSentence || '',
       exampleTranslation || '',
+      categoryJson,
       Date.now()
     ).run();
 

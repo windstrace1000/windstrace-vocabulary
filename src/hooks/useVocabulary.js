@@ -11,6 +11,7 @@ export function useVocabulary(userId) {
   const [sortBy, setSortBy] = useState('date-desc');
   const [filterText, setFilterText] = useState('');
   const [posFilter, setPosFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
   const [isGrouped, setIsGrouped] = useState(false);
   const [expandedWordId, setExpandedWordId] = useState(null);
@@ -61,10 +62,38 @@ export function useVocabulary(userId) {
     return Array.from(posSet).sort();
   }, [savedWords]);
 
+  // 取得所有不重複的分類清單
+  const uniqueCategoryList = useMemo(() => {
+    const categoryMap = new Map();
+    savedWords.forEach(w => {
+      const type = w.category?.type || 'lifestyle';
+      let id = 'lifestyle';
+      let label = '日常・生活';
+      if (type === 'textbook') {
+        id = `textbook-${w.category.version}-${w.category.book}`;
+        label = `課本 (${w.category.version} 第${w.category.book}冊)`;
+      } else if (type === 'magazine') {
+        id = `magazine-${w.category.brand}-${w.category.year}-${w.category.month}`;
+        label = `雜誌 (${w.category.brand} ${w.category.year}/${w.category.month})`;
+      }
+      categoryMap.set(id, { id, label, type });
+    });
+    return Array.from(categoryMap.values()).sort((a, b) => b.type.localeCompare(a.type));
+  }, [savedWords]);
+
   // 篩選、排序後的單字列表
   const processedWords = useMemo(() => {
     let result = savedWords;
     if (posFilter !== 'all') result = result.filter(w => w.partOfSpeech === posFilter);
+    if (categoryFilter !== 'all') {
+      result = result.filter(w => {
+        const type = w.category?.type || 'lifestyle';
+        let id = 'lifestyle';
+        if (type === 'textbook') id = `textbook-${w.category.version}-${w.category.book}`;
+        else if (type === 'magazine') id = `magazine-${w.category.brand}-${w.category.year}-${w.category.month}`;
+        return id === categoryFilter;
+      });
+    }
     if (filterText.trim()) {
       result = result.filter(w =>
         w.word.toLowerCase().includes(filterText.toLowerCase()) ||
@@ -115,10 +144,11 @@ export function useVocabulary(userId) {
     sortBy, setSortBy,
     filterText, setFilterText,
     posFilter, setPosFilter,
+    categoryFilter, setCategoryFilter,
     viewMode, setViewMode,
     isGrouped, setIsGrouped,
     expandedWordId, setExpandedWordId,
-    uniquePosList, processedWords, groupedWords,
+    uniquePosList, uniqueCategoryList, processedWords, groupedWords,
     saveWord, removeWord, refreshWords: fetchWords,
   };
 }

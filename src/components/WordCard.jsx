@@ -2,10 +2,36 @@
 // WordCard 單字卡片組件（展開/收合）
 // ==========================================
 
-import { Volume2, Trash2, X } from 'lucide-react';
+import { Volume2, Trash2, X, Book, Newspaper, Coffee } from 'lucide-react';
 import { playAudio } from '../utils/audio';
 
 export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onCollapse, onDelete, onSearch }) {
+  
+  const renderCategoryBadge = (category) => {
+    if (!category || category.type === 'lifestyle') {
+      return (
+        <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-semibold rounded-md flex items-center gap-1 shrink-0">
+          <Coffee className="w-3 h-3" /> 生活
+        </span>
+      );
+    }
+    
+    if (category.type === 'textbook') {
+      return (
+        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-md border border-emerald-100 flex items-center gap-1 shrink-0">
+          <Book className="w-3 h-3" /> {category.version} B{category.book}
+        </span>
+      );
+    } else if (category.type === 'magazine') {
+      return (
+        <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-xs font-semibold rounded-md border border-amber-100 flex items-center gap-1 shrink-0">
+          <Newspaper className="w-3 h-3" /> {category.brand} {category.year}/{category.month}
+        </span>
+      );
+    }
+    return null;
+  };
+
   // 展開狀態的完整卡片
   if (isExpanded) {
     return (
@@ -24,8 +50,9 @@ export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onC
                   <Volume2 className="w-6 h-6" />
                 </button>
               </div>
-              <div className="flex items-center gap-2 text-lg">
+              <div className="flex items-center gap-2 text-lg flex-wrap">
                 <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded-md">{wordData.partOfSpeech}</span>
+                {renderCategoryBadge(wordData.category)}
                 <span className="text-slate-700 font-medium">{wordData.translation}</span>
               </div>
             </div>
@@ -107,11 +134,14 @@ export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onC
   // 收合狀態 - 網格模式
   if (viewMode === 'grid') {
     return (
-      <div onClick={onExpand} className="bg-white rounded-2xl shadow-sm border border-slate-100 transition-all duration-300 hover:shadow-md cursor-pointer group p-5">
+      <div onClick={onExpand} className="bg-white rounded-2xl shadow-sm border border-slate-100 transition-all duration-300 hover:shadow-md cursor-pointer group p-5 flex flex-col h-full">
         <div className="flex justify-between items-start mb-2">
           <div>
             <h3 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{wordData.word}</h3>
-            <span className="text-xs font-semibold px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded mt-1 inline-block">{wordData.partOfSpeech}</span>
+            <div className="flex flex-wrap gap-1 mt-1">
+              <span className="text-xs font-semibold px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded">{wordData.partOfSpeech}</span>
+              {renderCategoryBadge(wordData.category)}
+            </div>
           </div>
           <div className="flex gap-1">
             <button onClick={(e) => { e.stopPropagation(); playAudio(wordData.word); }} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors"><Volume2 className="w-4 h-4" /></button>
@@ -119,8 +149,8 @@ export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onC
           </div>
         </div>
         <p className="text-slate-700 font-medium mb-3">{wordData.translation}</p>
-        <div className="text-sm text-slate-500 line-clamp-2 italic">"{wordData.exampleSentence}"</div>
-        <div className="mt-4 text-center text-xs text-indigo-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">點擊展開詳細資訊與詞形變化</div>
+        <div className="text-sm text-slate-500 line-clamp-2 italic mb-auto">"{wordData.exampleSentence}"</div>
+        <div className="mt-4 text-center text-xs text-indigo-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">點擊展開</div>
       </div>
     );
   }
@@ -129,10 +159,13 @@ export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onC
   return (
     <div onClick={onExpand} className="bg-white rounded-2xl shadow-sm border border-slate-100 transition-all duration-300 hover:shadow-md cursor-pointer group p-4 flex items-center justify-between gap-4">
       <div className="flex items-center gap-4 flex-1 min-w-0">
-        <div className="w-32 flex-shrink-0">
-          <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate">{wordData.word}</h3>
+        <div className="w-40 flex-shrink-0 flex flex-col justify-center">
+          <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate leading-tight">{wordData.word}</h3>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {renderCategoryBadge(wordData.category)}
+          </div>
         </div>
-        <div className="hidden sm:block flex-shrink-0 w-24">
+        <div className="hidden sm:block flex-shrink-0 w-20">
           <span className="text-xs font-semibold px-2 py-1 bg-indigo-50 text-indigo-600 rounded">{wordData.partOfSpeech}</span>
         </div>
         <div className="flex-1 truncate text-slate-700 font-medium">

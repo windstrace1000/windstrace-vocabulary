@@ -8,9 +8,9 @@ import WordCard from './WordCard';
 export default function ListTab({ vocabulary, onSearch, onDeleteWord }) {
   const {
     savedWords, sortBy, setSortBy, filterText, setFilterText,
-    posFilter, setPosFilter, viewMode, setViewMode,
+    posFilter, setPosFilter, categoryFilter, setCategoryFilter, viewMode, setViewMode,
     isGrouped, setIsGrouped, expandedWordId, setExpandedWordId,
-    uniquePosList, processedWords, groupedWords,
+    uniquePosList, uniqueCategoryList, processedWords, groupedWords,
   } = vocabulary;
 
   const renderWordCard = (wordData) => (
@@ -29,13 +29,13 @@ export default function ListTab({ vocabulary, onSearch, onDeleteWord }) {
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
       {/* 標題與工具列 */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-6">
         <h2 className="text-xl font-bold text-slate-800 flex-shrink-0">我的單字本 ({savedWords.length})</h2>
 
         {savedWords.length > 0 && (
-          <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full xl:w-auto">
             {/* 搜尋 */}
-            <div className="relative flex-1 sm:w-48 sm:flex-none">
+            <div className="relative flex-1 min-w-[150px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
@@ -47,11 +47,23 @@ export default function ListTab({ vocabulary, onSearch, onDeleteWord }) {
             </div>
 
             {/* 篩選與排序 */}
-            <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              {/* 分類篩選器 */}
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer flex-shrink-0 w-full sm:w-auto max-w-[180px] truncate"
+              >
+                <option value="all">所有分類</option>
+                {uniqueCategoryList.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.label}</option>
+                ))}
+              </select>
+
               <select
                 value={posFilter}
                 onChange={(e) => setPosFilter(e.target.value)}
-                className="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer flex-shrink-0"
+                className="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer flex-shrink-0 w-full sm:w-auto"
               >
                 <option value="all">所有詞性</option>
                 {uniquePosList.map(pos => (

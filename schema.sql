@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS vocabulary (
   similar_words TEXT NOT NULL DEFAULT '[]',
   example_sentence TEXT NOT NULL,
   example_translation TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT '{"type":"lifestyle"}',
   created_at INTEGER NOT NULL,
   PRIMARY KEY (user_id, word)
 );

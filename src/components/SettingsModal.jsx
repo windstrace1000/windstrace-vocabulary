@@ -3,12 +3,19 @@
 // ==========================================
 
 import { useState } from 'react';
-import { X, Key, ShieldCheck, AlertCircle, Cpu } from 'lucide-react';
+import { X, Key, ShieldCheck, AlertCircle, Cpu, Book, Newspaper, Plus, Trash2 } from 'lucide-react';
 import { getGeminiApiKey, setGeminiApiKey, getGeminiModel, setGeminiModel } from '../utils/apiKey';
+import { getCategorySettings, saveCategorySettings } from '../utils/categories';
 
 export default function SettingsModal({ isOpen, onClose }) {
   const [apiKeyInput, setApiKeyInput] = useState(getGeminiApiKey());
   const [modelInput, setModelInput] = useState(getGeminiModel());
+  const [categories, setCategories] = useState(getCategorySettings());
+  
+  // 新增輸入框狀態
+  const [newTextbook, setNewTextbook] = useState('');
+  const [newMagazine, setNewMagazine] = useState('');
+
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   if (!isOpen) return null;
@@ -16,6 +23,7 @@ export default function SettingsModal({ isOpen, onClose }) {
   const handleSave = () => {
     setGeminiApiKey(apiKeyInput);
     setGeminiModel(modelInput);
+    saveCategorySettings(categories);
     setSaveSuccess(true);
     setTimeout(() => {
       setSaveSuccess(false);
@@ -23,10 +31,46 @@ export default function SettingsModal({ isOpen, onClose }) {
     }, 1500);
   };
 
+  const addCategory = (type) => {
+    if (type === 'textbook' && newTextbook.trim()) {
+      if (!categories.textbookVersions.includes(newTextbook.trim())) {
+        setCategories(prev => ({
+          ...prev,
+          textbookVersions: [...prev.textbookVersions, newTextbook.trim()]
+        }));
+      }
+      setNewTextbook('');
+    } else if (type === 'magazine' && newMagazine.trim()) {
+      if (!categories.magazineBrands.includes(newMagazine.trim())) {
+        setCategories(prev => ({
+          ...prev,
+          magazineBrands: [...prev.magazineBrands, newMagazine.trim()]
+        }));
+      }
+      setNewMagazine('');
+    }
+  };
+
+  const removeCategory = (type, itemToRemove) => {
+    if (type === 'textbook') {
+      setCategories(prev => ({
+        ...prev,
+        textbookVersions: prev.textbookVersions.filter(item => item !== itemToRemove)
+      }));
+    } else {
+      setCategories(prev => ({
+        ...prev,
+        magazineBrands: prev.magazineBrands.filter(item => item !== itemToRemove)
+      }));
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-200">
-        <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+      <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+        
+        {/* Header */}
+        <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-2 text-slate-800">
             <Key className="w-5 h-5 text-indigo-600" />
             <h3 className="text-xl font-bold">系統設定</h3>
@@ -36,55 +80,139 @@ export default function SettingsModal({ isOpen, onClose }) {
           </button>
         </div>
         
-        <div className="space-y-5 mb-8">
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-sm font-semibold text-slate-700">Gemini API Key</label>
-              <a 
-                href="https://aistudio.google.com/app/apikey" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 font-medium"
-              >
-                前往申請免費金鑰 ↗
-              </a>
-            </div>
-            <input
-              type="password"
-              value={apiKeyInput}
-              onChange={(e) => setApiKeyInput(e.target.value)}
-              placeholder="AIzaSyB..."
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all font-mono text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 mb-2">
-              <Cpu className="w-4 h-4 text-slate-500" /> AI 模型版本
-            </label>
-            <select
-              value={modelInput}
-              onChange={(e) => setModelInput(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all text-sm font-medium text-slate-700 cursor-pointer"
-            >
-              <option value="gemini-3-flash-preview">🌟 Gemini 3 Flash 預覽版 (最快最聰明)</option>
-              <option value="gemini-2.5-flash">Gemini 2.5 Flash 穩定版</option>
-            </select>
-          </div>
+        {/* Body */}
+        <div className="p-6 overflow-y-auto space-y-8">
           
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 text-sm text-amber-800">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 text-amber-600 mt-0.5" />
-            <div className="leading-relaxed">
-              <strong>隱私與安全提示：</strong>
-              <p className="mt-1 text-amber-700">您的 API 金鑰僅會加密儲存在您當前的瀏覽器中（Local Storage），並且不會被記錄或儲存在我們的伺服器資料庫。我們強烈建議您為這個金鑰設定適當的額度限制。</p>
+          {/* AI 設定區 */}
+          <section className="space-y-4">
+            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider">AI 設定</h4>
+            
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-semibold text-slate-700">Gemini API Key</label>
+                <a 
+                  href="https://aistudio.google.com/app/apikey" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 font-medium"
+                >
+                  前往申請免費金鑰 ↗
+                </a>
+              </div>
+              <input
+                type="password"
+                value={apiKeyInput}
+                onChange={(e) => setApiKeyInput(e.target.value)}
+                placeholder="AIzaSyB..."
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all font-mono text-sm"
+              />
             </div>
-          </div>
+
+            <div>
+              <label className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 mb-2">
+                <Cpu className="w-4 h-4 text-slate-500" /> AI 模型版本
+              </label>
+              <select
+                value={modelInput}
+                onChange={(e) => setModelInput(e.target.value)}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all text-sm font-medium text-slate-700 cursor-pointer"
+              >
+                <option value="gemini-3-flash-preview">🌟 Gemini 3 Flash 預覽版 (最快最聰明)</option>
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash 穩定版</option>
+              </select>
+            </div>
+            
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 text-sm text-amber-800">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 text-amber-600 mt-0.5" />
+              <div className="leading-relaxed">
+                <p className="text-amber-700">API 金鑰僅會加密儲存在您的瀏覽器中。我們強烈建議為此金鑰設定適當的額度限制。</p>
+              </div>
+            </div>
+          </section>
+
+          <hr className="border-slate-100" />
+
+          {/* 分類選項設定區 */}
+          <section className="space-y-6">
+            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider">單字分類選項設定</h4>
+            
+            {/* 課本版本設定 */}
+            <div className="space-y-3">
+              <label className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+                <Book className="w-4 h-4 text-indigo-500" /> 課本版本選項
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newTextbook}
+                  onChange={(e) => setNewTextbook(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addCategory('textbook')}
+                  placeholder="新增版本 (例如：三民)"
+                  className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
+                />
+                <button
+                  onClick={() => addCategory('textbook')}
+                  disabled={!newTextbook.trim()}
+                  className="px-4 py-2.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl transition-colors disabled:opacity-50"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {categories.textbookVersions.map(item => (
+                  <div key={item} className="group flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 shadow-sm">
+                    {item}
+                    <button onClick={() => removeCategory('textbook', item)} className="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+            </div>
+            </div>
+
+            {/* 雜誌品牌設定 */}
+            <div className="space-y-3">
+              <label className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+                <Newspaper className="w-4 h-4 text-indigo-500" /> 雜誌品牌選項
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newMagazine}
+                  onChange={(e) => setNewMagazine(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addCategory('magazine')}
+                  placeholder="新增雜誌 (例如：常春藤)"
+                  className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
+                />
+                <button
+                  onClick={() => addCategory('magazine')}
+                  disabled={!newMagazine.trim()}
+                  className="px-4 py-2.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl transition-colors disabled:opacity-50"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {categories.magazineBrands.map(item => (
+                  <div key={item} className="group flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 shadow-sm">
+                    {item}
+                    <button onClick={() => removeCategory('magazine', item)} className="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+          </section>
+
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 shrink-0 bg-slate-50 rounded-b-2xl">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-medium transition-colors"
+            className="px-5 py-2.5 text-slate-600 hover:bg-slate-200 rounded-xl font-medium transition-colors"
           >
             取消
           </button>

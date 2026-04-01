@@ -34,8 +34,8 @@ export default function App() {
   // 單字本 Hook
   const vocabulary = useVocabulary(userId);
 
-  // 測驗 Hook
-  const quiz = useQuiz(vocabulary.savedWords);
+  // 測驗 Hook (使用過濾後的單字，這樣就可以針對特定分類或詞性進行測驗)
+  const quiz = useQuiz(vocabulary.processedWords);
 
   // 查詢單字（可從任何頁面觸發，會自動切換到查詢頁）
   const performSearch = useCallback(async (wordToSearch) => {
