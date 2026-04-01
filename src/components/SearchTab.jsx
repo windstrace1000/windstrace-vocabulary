@@ -46,24 +46,24 @@ export default function SearchTab({
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
       {/* 搜尋表單 */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <h2 className="text-xl font-bold text-slate-800 mb-4">查詢新單字</h2>
-        <form onSubmit={handleSubmit} className="flex gap-2">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100">
+        <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-4">查詢新單字</h2>
+        <form onSubmit={handleSubmit} className="flex flex-nowrap items-center gap-2">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="輸入英文單字..."
-            className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            className="flex-1 min-w-0 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm sm:text-base"
             disabled={isSearching}
           />
           <button
             type="submit"
             disabled={isSearching || !searchQuery.trim()}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
+            className="flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium flex items-center justify-center gap-1.5 sm:gap-2 transition-all disabled:opacity-50 active:scale-95 shadow-md shadow-indigo-100 h-full"
           >
-            {isSearching ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
-            <span className="hidden sm:inline">{isSearching ? '查詢中...' : '查詢'}</span>
+            {isSearching ? <Loader2 className="w-4 h-4 sm:w-5 h-5 animate-spin" /> : <Search className="w-4 h-4 sm:w-5 h-5" />}
+            <span className="text-sm sm:text-base">{isSearching ? (window.innerWidth < 640 ? '...' : '查詢中...') : '查詢'}</span>
           </button>
         </form>
         {searchError && <p className="text-red-500 mt-3 text-sm">{searchError}</p>}
