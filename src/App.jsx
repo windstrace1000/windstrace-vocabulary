@@ -4,11 +4,12 @@
 // ==========================================
 
 import { useState, useMemo, useCallback } from 'react';
-import { Search, BookOpen, BrainCircuit, FileText } from 'lucide-react';
+import { Search, BookOpen, BrainCircuit, FileText, Mic } from 'lucide-react';
 import Header from './components/Header';
 import SearchTab from './components/SearchTab';
 import ListTab from './components/ListTab';
 import QuizTab from './components/QuizTab';
+import SpeakTab from './components/SpeakTab';
 import ArticleTab from './components/ArticleTab';
 import DeleteModal from './components/DeleteModal';
 import SettingsModal from './components/SettingsModal';
@@ -137,12 +138,16 @@ export default function App() {
             isSearching={isSearching}
           />
         )}
+        {activeTab === 'speak' && (
+          <SpeakTab />
+        )}
       </main>
 
       {/* 底部導航（手機版） */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-2 pb-safe z-10">
         <MobileTabButton active={activeTab === 'search'} onClick={() => setActiveTab('search')} icon={<Search />} label="查詢" />
         <MobileTabButton active={activeTab === 'article'} onClick={() => setActiveTab('article')} icon={<FileText />} label="閱讀" />
+        <MobileTabButton active={activeTab === 'speak'} onClick={() => setActiveTab('speak')} icon={<Mic />} label="口說" />
         <MobileTabButton active={activeTab === 'list'} onClick={() => setActiveTab('list')} icon={<BookOpen />} label="單字本" badge={vocabulary.savedWords.length} />
         <MobileTabButton active={activeTab === 'quiz'} onClick={() => setActiveTab('quiz')} icon={<BrainCircuit />} label="測驗" />
       </nav>

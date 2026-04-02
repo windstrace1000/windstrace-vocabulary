@@ -2,7 +2,7 @@
 // Header 頂部導航組件
 // ==========================================
 
-import { BookOpen, Search, BrainCircuit, Settings, FileText } from 'lucide-react';
+import { BookOpen, Search, BrainCircuit, Settings, FileText, Mic } from 'lucide-react';
 import TabButton from './TabButton';
 
 export default function Header({ activeTab, setActiveTab, savedWordsCount, onOpenSettings }) {
@@ -27,6 +27,12 @@ export default function Header({ activeTab, setActiveTab, savedWordsCount, onOpe
               onClick={() => setActiveTab('article')}
               icon={<FileText className="w-4 h-4" />}
               label="閱讀"
+            />
+            <TabButton
+              active={activeTab === 'speak'}
+              onClick={() => setActiveTab('speak')}
+              icon={<Mic className="w-4 h-4" />}
+              label="口說"
             />
             <TabButton
               active={activeTab === 'list'}

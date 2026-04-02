@@ -134,3 +134,32 @@ export const deleteWord = async (userId, word) => {
   if (!response.ok) throw new Error('刪除失敗');
   return response.json();
 };
+
+/**
+ * AI 口說練習對話
+ * 發送對話歷史給 AI，取得回覆
+ */
+export const chatWithAI = async (messages, scenario) => {
+  const apiKey = getGeminiApiKey();
+  const model = getGeminiModel();
+
+  if (!apiKey) {
+    throw new Error('請先在設定中輸入您的 Gemini API Key');
+  }
+
+  const response = await fetch(`${API_BASE}/chat`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Gemini-Api-Key': apiKey
+    },
+    body: JSON.stringify({ messages, scenario, model }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || '對話失敗');
+  }
+
+  return response.json();
+};
