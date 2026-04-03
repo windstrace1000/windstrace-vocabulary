@@ -40,12 +40,14 @@ export async function onRequestPost(context) {
               word: row.word,
               translation: row.translation,
               partOfSpeech: row.part_of_speech,
+              candidates: [{ word: row.word, translation: row.translation }],
               relatedForms: JSON.parse(row.related_forms || '[]'),
               similarWords: JSON.parse(row.similar_words || '[]'),
               relatedPhrases: JSON.parse(row.related_phrases || '[]'),
               exampleSentence: row.example_sentence,
               exampleTranslation: row.example_translation
             });
+
           }
         }
 
@@ -57,12 +59,14 @@ export async function onRequestPost(context) {
     // ===============================================
 
     const prompt = `請以專業英文老師的角色分析 "${word.trim()}"。
-1. 如果輸入是中文，請找出其最對應的一個常用的英文單字或片語。
-2. 如果輸入是英文單字，請分析該單字。
-3. 如果輸入是英文片語，請分析該片語。
+1. 如果輸入是中文：
+   - 請找出其對應的 3-5 個常用的英文單字或片語。
+   - 將「最貼切或最常用」的一個單字作為主分析對象，填入下方 JSON 的其餘欄位。
+   - 將所有可能的英文選項（包含主分析對象）填入 "candidates" 陣列中，每個項目包含英文與簡短解釋。
+2. 如果輸入是英文單字，請分析該單字，"candidates" 陣列中只需包含該單字本身。
+3. 如果輸入是英文片語，請分析該片語，"candidates" 陣列中只需包含該片語本身。
 
 請提供該英文單字/片語的繁體中文翻譯、以及主要的詞性（請使用繁體中文，如：名詞、動詞、形容詞、副詞、介系詞、代名詞、連接詞、感嘆詞、助動詞、片語等）、相關詞形變化（衍生字）、拼寫相似或容易混淆的單字（形似字）、至少 2 個相關英文片語與其翻譯，以及一個實用的英文例句和翻譯。`;
-
 
     const payload = {
       contents: [{ parts: [{ text: prompt }] }],
@@ -74,9 +78,21 @@ export async function onRequestPost(context) {
         responseSchema: {
           type: "OBJECT",
           properties: {
-            word: { type: "STRING" },
-            translation: { type: "STRING" },
+            word: { type: "STRING", description: "主要分析的英文單字" },
+            translation: { type: "STRING", description: "主要分析單字的翻譯" },
             partOfSpeech: { type: "STRING" },
+            candidates: {
+              type: "ARRAY",
+              description: "其他可能的英文單字及其繁體中文解釋",
+              items: {
+                type: "OBJECT",
+                properties: {
+                  word: { type: "STRING" },
+                  translation: { type: "STRING", description: "針對此單字的具體翻譯" }
+                },
+                required: ["word", "translation"]
+              }
+            },
             relatedForms: {
               type: "ARRAY",
               items: {
@@ -111,7 +127,7 @@ export async function onRequestPost(context) {
             exampleSentence: { type: "STRING" },
             exampleTranslation: { type: "STRING" }
           },
-          required: ["word", "translation", "partOfSpeech", "relatedForms", "similarWords", "relatedPhrases", "exampleSentence", "exampleTranslation"]
+          required: ["word", "translation", "partOfSpeech", "candidates", "relatedForms", "similarWords", "relatedPhrases", "exampleSentence", "exampleTranslation"]
         }
       }
     };

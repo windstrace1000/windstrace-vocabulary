@@ -22,10 +22,12 @@ export default function App() {
   const userId = useMemo(() => getUserId(), []);
   const [activeTab, setActiveTab] = useState('search');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [lastQuery, setLastQuery] = useState('');
 
   // 查詢狀態
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResult, setSearchResult] = useState(null);
+  const [searchCandidates, setSearchCandidates] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
 
@@ -40,7 +42,7 @@ export default function App() {
 
   // 查詢單字（可從任何頁面觸發）
   // 如果 switchTab 為 false，則不自動切換到查詢頁（用於文章閱讀模式）
-  const performSearch = useCallback(async (wordToSearch, { switchTab = true } = {}) => {
+  const performSearch = useCallback(async (wordToSearch, { switchTab = true, isCandidateSelection = false } = {}) => {
     if (!wordToSearch.trim()) return;
     
     const searchStr = wordToSearch.trim().toLowerCase();
@@ -51,27 +53,50 @@ export default function App() {
     }
     setSearchQuery(wordToSearch);
     
-    // 如果單字已經在單字本中，直接顯示結果，秒殺載入時間
+    // 如果是全新的查詢（從搜尋框輸入），則必須清空舊的候選單字名單
+    if (!isCandidateSelection) {
+      setSearchCandidates([]);
+    }
+
+    // 先檢查是否已經在單字本中
     const existingWord = vocabulary.savedWords.find(w => w.word.toLowerCase() === searchStr);
+    
     if (existingWord) {
       setSearchResult(existingWord);
       setIsSearching(false);
       setSearchError('');
+      // 關鍵：如果是全新查詢且該單字本身就帶有 candidates 列表，我們才同步更新它
+      if (!isCandidateSelection && existingWord.candidates && existingWord.candidates.length > 1) {
+        setSearchCandidates(existingWord.candidates);
+      }
       return;
     }
 
     setIsSearching(true);
     setSearchError('');
-    setSearchResult(null);
+    
+    // 如果是點擊候選單字或卡片連結，我們保留當前畫面內容直到新結果回來
+    if (!isCandidateSelection) {
+      setSearchResult(null);
+    }
+
     try {
       const data = await searchWord(wordToSearch.trim());
       setSearchResult(data);
+      
+      // 更新候選名單：只有當為全新查詢，且新結果明確包含候選清單時才更新
+      // 這樣可以確保任何卡片內部的點擊狀態跳轉，都絕對不會覆寫目前頂端的候選清單
+      if (!isCandidateSelection && data.candidates && data.candidates.length > 1) {
+        setSearchCandidates(data.candidates);
+      }
     } catch (error) {
       setSearchError(error.message || '查詢失敗，請確認網路連線或稍後再試。');
     } finally {
       setIsSearching(false);
     }
   }, [vocabulary.savedWords]);
+
+
 
   // 文章閱讀模式專用查詢（不切換分頁）
   const performArticleSearch = useCallback(async (wordToSearch) => {
@@ -111,6 +136,7 @@ export default function App() {
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             searchResult={searchResult}
+            searchCandidates={searchCandidates}
             isSearching={isSearching}
             searchError={searchError}
             savedWords={vocabulary.savedWords}
@@ -118,6 +144,7 @@ export default function App() {
             onSaveWord={handleSaveWord}
           />
         )}
+
         {activeTab === 'list' && (
           <ListTab
             vocabulary={vocabulary}
