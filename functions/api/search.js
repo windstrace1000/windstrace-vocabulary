@@ -27,23 +27,28 @@ export async function onRequestPost(context) {
     if (env.DB) {
       try {
         const cleanWord = word.trim().toLowerCase();
-        const { results } = await env.DB.prepare(
-          'SELECT * FROM vocabulary WHERE word = ? LIMIT 1'
-        ).bind(cleanWord).all();
+        const isChinese = /[\u4e00-\u9fa5]/.test(cleanWord);
         
-        if (results && results.length > 0) {
-          const row = results[0];
-          return Response.json({
-            word: row.word,
-            translation: row.translation,
-            partOfSpeech: row.part_of_speech,
-            relatedForms: JSON.parse(row.related_forms || '[]'),
-            similarWords: JSON.parse(row.similar_words || '[]'),
-            relatedPhrases: JSON.parse(row.related_phrases || '[]'),
-            exampleSentence: row.example_sentence,
-            exampleTranslation: row.example_translation
-          });
+        if (!isChinese) {
+          const { results } = await env.DB.prepare(
+            'SELECT * FROM vocabulary WHERE word = ? LIMIT 1'
+          ).bind(cleanWord).all();
+          
+          if (results && results.length > 0) {
+            const row = results[0];
+            return Response.json({
+              word: row.word,
+              translation: row.translation,
+              partOfSpeech: row.part_of_speech,
+              relatedForms: JSON.parse(row.related_forms || '[]'),
+              similarWords: JSON.parse(row.similar_words || '[]'),
+              relatedPhrases: JSON.parse(row.related_phrases || '[]'),
+              exampleSentence: row.example_sentence,
+              exampleTranslation: row.example_translation
+            });
+          }
         }
+
       } catch (dbError) {
         console.error('資料庫快取查詢內容:', dbError);
         // 若查詢失敗則繼續透過 Gemini API 查詢，不中斷流程
@@ -51,9 +56,13 @@ export async function onRequestPost(context) {
     }
     // ===============================================
 
-    const prompt = `請以專業英文老師的角色分析英文單字或片語 "${word.trim()}"。
-若查詢的是一個英文單字，請提供它的繁體中文翻譯、以及主要的詞性（請使用繁體中文，例如：名詞、動詞、形容詞、副詞、介系詞、代名詞、連接詞、感嘆詞、助動詞等，不要使用英文縮寫）、相關詞形變化（衍生字）、拼寫相似或容易混淆的單字（形似字）、**該單字常見的 2-3 個相關英文片語與片語翻譯**，以及一個實用的英文例句和翻譯。
-若查詢的是一個英文片語（或短句），請提供它的繁體中文翻譯，將詞性 (partOfSpeech) 標記為 "片語"，相關詞義、變化、形似字與相關片語可以留空，並提供一個實用的英文例句和翻譯。`;
+    const prompt = `請以專業英文老師的角色分析 "${word.trim()}"。
+1. 如果輸入是中文，請找出其最對應的一個常用的英文單字或片語。
+2. 如果輸入是英文單字，請分析該單字。
+3. 如果輸入是英文片語，請分析該片語。
+
+請提供該英文單字/片語的繁體中文翻譯、以及主要的詞性（請使用繁體中文，如：名詞、動詞、形容詞、副詞、介系詞、代名詞、連接詞、感嘆詞、助動詞、片語等）、相關詞形變化（衍生字）、拼寫相似或容易混淆的單字（形似字）、至少 2 個相關英文片語與其翻譯，以及一個實用的英文例句和翻譯。`;
+
 
     const payload = {
       contents: [{ parts: [{ text: prompt }] }],
