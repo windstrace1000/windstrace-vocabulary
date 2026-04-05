@@ -7,6 +7,8 @@ import { Search, Loader2, Volume2, BookmarkPlus, BookmarkCheck } from 'lucide-re
 import { playAudio } from '../utils/audio';
 import ChooseCategoryModal from './ChooseCategoryModal';
 
+import FormattedTeacherNotes from './FormattedTeacherNotes';
+
 export default function SearchTab({
   searchQuery, setSearchQuery, searchResult, searchCandidates, isSearching, searchError,
   savedWords, onSearch, onSaveWord
@@ -255,6 +257,19 @@ export default function SearchTab({
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {/* 老師講解卡片 */}
+      {searchResult?.teacherExplanation && (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden relative">
+          <div className="p-4 sm:p-6 border-b border-indigo-100 bg-indigo-50 flex items-center gap-3">
+            <span className="text-2xl">👩‍🏫</span>
+            <h3 className="text-lg sm:text-xl font-bold text-indigo-900">老師講解時間</h3>
+          </div>
+          <div className="p-4 sm:p-6 prose-slate max-w-none">
+            <FormattedTeacherNotes text={searchResult.teacherExplanation} />
+          </div>
         </div>
       )}
 

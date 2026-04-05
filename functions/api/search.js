@@ -45,7 +45,8 @@ export async function onRequestPost(context) {
               similarWords: JSON.parse(row.similar_words || '[]'),
               relatedPhrases: JSON.parse(row.related_phrases || '[]'),
               exampleSentence: row.example_sentence,
-              exampleTranslation: row.example_translation
+              exampleTranslation: row.example_translation,
+              teacherExplanation: row.teacher_explanation || ''
             });
 
           }
@@ -66,7 +67,29 @@ export async function onRequestPost(context) {
 2. 如果輸入是英文單字，請分析該單字，"candidates" 陣列中只需包含該單字本身。
 3. 如果輸入是英文片語，請分析該片語，"candidates" 陣列中只需包含該片語本身。
 
-請提供該英文單字/片語的繁體中文翻譯、以及主要的詞性（請使用繁體中文，如：名詞、動詞、形容詞、副詞、介系詞、代名詞、連接詞、感嘆詞、助動詞、片語等）、相關詞形變化（衍生字）、拼寫相似或容易混淆的單字（形似字）、至少 2 個相關英文片語與其翻譯，以及一個實用的英文例句和翻譯。`;
+請提供該英文單字/片語的繁體中文翻譯、以及主要的詞性（請使用繁體中文，如：名詞、動詞、形容詞、副詞、介系詞、代名詞、連接詞、感嘆詞、助動詞、片語等）、相關詞形變化（衍生字）、拼寫相似或容易混淆的單字（形似字）、至少 2 個相關英文片語與其翻譯，以及一個實用的英文例句和翻譯。
+請額外加上一段『老師講解』(teacherExplanation)。用親切的英文老師口吻（開頭為：各位同學好！我是你們的英文老師。今天我們要來仔細學習一個生活中非常實用、出現頻率極高的單字...），包含：
+(5) 常見搭配詞或片語（Collocations），並附上中文意思。
+
+這段內容請「嚴格依照以下結構與格式」排版：
+1. **開頭引言**：使用親切的口吻（如：各位同學好！我是你們的英文老師...）。
+2. **區塊分隔**：在每個大項目之間（如 1. 跟 2. 之間）務必插入 \`---\` 分隔線。
+3. **具體章節內容**（請使用數字標題，例如 1. 、 2. 等）：
+   - **1. KK音標與詞性**：包含單字、KK音標與詞性分類。
+   - **2. 繁體中文解釋**：包含詳細解釋與 (老師的小叮嚀)。
+   - **3. 3個實用的英文例句**：請使用「情境：...」作為引導，並附上例句與中文。
+   - **4. 同義詞與反義詞**：請使用 🟢 同義詞 (Synonyms) 與 🔴 反義詞 (Antonyms) 標籤。
+   - **5. 常見搭配詞或片語**：請使用 ✨ 必背片語、🔗 常見搭配名詞 等圖示標記。
+4. **結尾鼓勵**：一段簡單的鼓勵。
+
+格式細節要求：
+- **項目標題獨立行**：每個大項目標題（如 1. 、 2. 等）務必「單獨佔據第一行」，且後方若有內容必須「強制換行」。
+- **繁體中文解釋換行**：解釋文字中，只要遇到「句號(。)」就必須立即換行。
+- **實用英文例句拆分**：每個例句的「情境」、「英文」、「中文翻譯」都必須「分開佔據三行」。
+- **列表項獨立行**：同義詞、反義詞、搭配詞、片語，每項內容都必須「單獨一行」，不准併排。
+- **標示強調**：標題請使用 **粗體**。重要內容請適度使用 **粗體** 或 \`<u>\`底線\`</u>\`。
+- **視覺重心**：確保標題號碼（1. 2.等）下方不要有文字遮擋（透過前端組件達成，AI 僅需確保換行邏輯正確）。
+- 請確保排版空間感十足，視覺上極度清晰。`;
 
     const payload = {
       contents: [{ parts: [{ text: prompt }] }],
@@ -125,9 +148,10 @@ export async function onRequestPost(context) {
               }
             },
             exampleSentence: { type: "STRING" },
-            exampleTranslation: { type: "STRING" }
+            exampleTranslation: { type: "STRING" },
+            teacherExplanation: { type: "STRING", description: "老師的詳細講解內容" }
           },
-          required: ["word", "translation", "partOfSpeech", "candidates", "relatedForms", "similarWords", "relatedPhrases", "exampleSentence", "exampleTranslation"]
+          required: ["word", "translation", "partOfSpeech", "candidates", "relatedForms", "similarWords", "relatedPhrases", "exampleSentence", "exampleTranslation", "teacherExplanation"]
         }
       }
     };

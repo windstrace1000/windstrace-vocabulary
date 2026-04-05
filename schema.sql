@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS vocabulary (
   example_sentence TEXT NOT NULL,
   example_translation TEXT NOT NULL,
   category TEXT NOT NULL DEFAULT '{"type":"lifestyle"}',
+  teacher_explanation TEXT NOT NULL DEFAULT '',
   created_at INTEGER NOT NULL,
   PRIMARY KEY (user_id, word)
 );

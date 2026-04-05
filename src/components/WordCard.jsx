@@ -4,6 +4,7 @@
 
 import { Volume2, Trash2, X, Book, Newspaper, Coffee } from 'lucide-react';
 import { playAudio } from '../utils/audio';
+import FormattedTeacherNotes from './FormattedTeacherNotes';
 
 export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onCollapse, onDelete, onSearch }) {
   
@@ -171,6 +172,19 @@ export default function WordCard({ wordData, isExpanded, viewMode, onExpand, onC
                       ))}
                     </tbody>
                   </table>
+                </div>
+              </div>
+            )}
+
+            {/* 老師講解卡片 (WordCard 也有) */}
+            {wordData.teacherExplanation && (
+              <div className="bg-indigo-50/50 rounded-xl border border-indigo-100 overflow-hidden mt-6">
+                <div className="p-4 border-b border-indigo-100 bg-indigo-50/80 flex items-center gap-3">
+                  <span className="text-xl">👩‍🏫</span>
+                  <h3 className="text-base font-bold text-indigo-900">老師筆記</h3>
+                </div>
+                <div className="p-4 sm:p-6 prose-slate max-w-none">
+                  <FormattedTeacherNotes text={wordData.teacherExplanation} />
                 </div>
               </div>
             )}
