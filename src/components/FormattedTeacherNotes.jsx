@@ -23,7 +23,33 @@ const FormattedTeacherNotes = ({ text }) => {
 
   // 3. 高亮格式化函數 (處理粗體、底線、發音)
   const formatText = (content, shouldAddAudio = true) => {
-    // 使用正則表達式捕獲 **粗體** 或 <u>底線</u>
+    const trimmed = content.trim();
+    
+    // 特殊邏輯：如果整行是一串長英文且不含中文（通常是舊內容的例句），主動加上發音
+    // 條件：長度 > 5, 不含中文, 沒有粗體標記
+    const isPureEnglishSentence = shouldAddAudio && 
+                                  trimmed.length > 5 && 
+                                  !/[\u4E00-\u9FFF]/.test(trimmed) && 
+                                  !content.includes('**');
+
+    if (isPureEnglishSentence) {
+      return (
+        <span className="inline-flex items-center gap-1.5 align-baseline group">
+          <span className="text-slate-700">{content}</span>
+          <button 
+            onClick={() => handleSpeak(trimmed)}
+            className="cursor-pointer transform hover:scale-110 active:scale-95 transition-all text-indigo-400 hover:text-indigo-600 focus:outline-none"
+            title="播放發音"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            </svg>
+          </button>
+        </span>
+      );
+    }
+
+    // 原有的 split 邏輯：處理 **粗體** 或 <u>底線</u>
     const parts = content.split(/(\*\*.*?\*\*|<u>.*?<\/u>)/g);
     
     return parts.map((part, i) => {
