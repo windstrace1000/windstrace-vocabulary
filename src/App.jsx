@@ -38,7 +38,7 @@ export default function App() {
   const vocabulary = useVocabulary(userId);
 
   // 測驗 Hook (使用過濾後的單字，這樣就可以針對特定分類或詞性進行測驗)
-  const quiz = useQuiz(vocabulary.processedWords);
+  const quiz = useQuiz(vocabulary.processedWords, userId, vocabulary.saveWord);
 
   // 查詢單字（可從任何頁面觸發）
   // 如果 switchTab 為 false，則不自動切換到查詢頁（用於文章閱讀模式）

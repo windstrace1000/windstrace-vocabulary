@@ -9,8 +9,32 @@ export default function QuizTab({ quiz }) {
   const {
     quizList, quizIndex, showAnswer, setShowAnswer,
     quizMode, quizScore, handleAnswer, restart, changeMode,
-    currentWord, isComplete, hasWords,
+    currentWord, isComplete, hasWords, isReviewMode, setIsReviewMode, dueCount
   } = quiz;
+
+  // 如果今日沒有待複習單字
+  if (isReviewMode && quizList.length === 0) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <ControlPanel />
+        <div className="text-center py-16 bg-white rounded-2xl border border-slate-100 shadow-sm animate-in fade-in">
+          <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-10 h-10" />
+          </div>
+          <h3 className="text-xl font-bold text-slate-800">太棒了！目前沒有待複習的單字</h3>
+          <p className="text-slate-500 mt-2 max-w-md mx-auto">
+            你已經完成了所有的階段性複習任務。現在是學習新單字的好時機，或者你可以切換到「全體測驗」模式來鞏固記憶。
+          </p>
+          <button 
+            onClick={() => setIsReviewMode(false)}
+            className="mt-8 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-6 py-2.5 rounded-xl font-medium transition-colors"
+          >
+            去全體測驗看看
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // 沒有足夠的單字
   if (!hasWords) {
@@ -24,16 +48,31 @@ export default function QuizTab({ quiz }) {
   }
 
   // 模式切換按鈕
-  const ModeSwitch = () => (
-    <div className="flex bg-slate-200/50 p-1 rounded-xl">
-      <button
-        onClick={() => changeMode('en-zh')}
-        className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${quizMode === 'en-zh' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-      >英翻中</button>
-      <button
-        onClick={() => changeMode('zh-en')}
-        className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${quizMode === 'zh-en' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-      >中翻英</button>
+  const ControlPanel = () => (
+    <div className="flex flex-col sm:flex-row gap-4 items-center justify-center w-full mb-6">
+      <div className="flex bg-slate-200/50 p-1 rounded-xl w-fit">
+        <button
+          onClick={() => setIsReviewMode(true)}
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${isReviewMode ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+        >
+          今日複習 {dueCount > 0 && <span className="ml-1 bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full text-[10px]">{dueCount}</span>}
+        </button>
+        <button
+          onClick={() => setIsReviewMode(false)}
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${!isReviewMode ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+        >全體測驗</button>
+      </div>
+
+      <div className="flex bg-slate-200/50 p-1 rounded-xl w-fit">
+        <button
+          onClick={() => changeMode('en-zh')}
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${quizMode === 'en-zh' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+        >英翻中</button>
+        <button
+          onClick={() => changeMode('zh-en')}
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${quizMode === 'zh-en' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+        >中翻英</button>
+      </div>
     </div>
   );
 
@@ -41,18 +80,18 @@ export default function QuizTab({ quiz }) {
   if (isComplete) {
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="flex justify-center mb-6"><ModeSwitch /></div>
+        <ControlPanel />
         <div className="text-center py-16 bg-white rounded-2xl border border-slate-100 shadow-sm animate-in zoom-in-95">
           <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-10 h-10" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">複習完成！</h2>
-          <p className="text-slate-600 mb-8 leading-relaxed">
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">{isReviewMode ? '今日複習完成！' : '全體測驗完成！'}</h2>
+          <p className="text-slate-600 mb-8 leading-relaxed px-6">
             你剛剛進行了 <span className="font-bold text-indigo-600">{quizList.length}</span> 次答題，<br />
-            成功將 <span className="font-bold text-emerald-600">{quizScore}</span> 個單字標記為「已經熟練」！
+            {isReviewMode ? '恭喜你完成了這批單字的艾賓浩斯週期複習，記憶力更上一層樓！' : `成功將 ${quizScore} 個單字標記為已經熟練！`}
           </p>
-          <button onClick={restart} className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-medium transition-colors">
-            再來一次
+          <button onClick={restart} className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-medium transition-colors shadow-lg shadow-indigo-200">
+            再次測驗
           </button>
         </div>
       </div>
@@ -65,10 +104,10 @@ export default function QuizTab({ quiz }) {
   // 測驗進行中
   return (
     <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4">
+      <ControlPanel />
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <ModeSwitch />
         <div className="text-sm font-medium text-slate-500 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100">
-          進度：<span className="font-bold text-indigo-600">{quizIndex + 1}</span> / {quizList.length}
+          測驗進度：<span className="font-bold text-indigo-600">{quizIndex + 1}</span> / {quizList.length}
         </div>
       </div>
 

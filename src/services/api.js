@@ -124,6 +124,24 @@ export const saveWord = async (userId, wordData) => {
 };
 
 /**
+ * 更新單字的複習進度 (艾賓浩斯遺忘曲線)
+ */
+export const updateWordReviewProgress = async (userId, wordData, isCorrect) => {
+  const { calculateNextProgress } = await import('../utils/ebbinghaus');
+  const { nextStage, nextReviewTime, lastReviewed } = calculateNextProgress(wordData.reviewStage || 0, isCorrect);
+
+  const updatedData = {
+    ...wordData,
+    reviewStage: nextStage,
+    nextReview: nextReviewTime,
+    lastReviewed: lastReviewed
+  };
+
+  // 直接複用 saveWord 的邏輯進行 INSERT OR REPLACE
+  return saveWord(userId, updatedData);
+};
+
+/**
  * 從資料庫刪除單字
  */
 export const deleteWord = async (userId, word) => {

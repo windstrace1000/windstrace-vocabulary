@@ -32,6 +32,9 @@ export async function onRequestGet(context) {
       teacherExplanation: row.teacher_explanation || '',
       category: row.category ? JSON.parse(row.category) : { type: 'lifestyle' },
       createdAt: row.created_at,
+      reviewStage: row.review_stage || 0,
+      lastReviewed: row.last_reviewed || 0,
+      nextReview: row.next_review || 0,
     }));
 
     return Response.json(words);
@@ -47,7 +50,7 @@ export async function onRequestPost(context) {
 
   try {
     const body = await request.json();
-    const { userId, word, translation, partOfSpeech, relatedForms, similarWords, relatedPhrases, exampleSentence, exampleTranslation, teacherExplanation, category } = body;
+    const { userId, word, translation, partOfSpeech, relatedForms, similarWords, relatedPhrases, exampleSentence, exampleTranslation, teacherExplanation, category, reviewStage, lastReviewed, nextReview } = body;
 
     if (!userId || !word) {
       return Response.json({ error: '缺少必要欄位' }, { status: 400 });
@@ -58,8 +61,8 @@ export async function onRequestPost(context) {
 
     await env.DB.prepare(`
       INSERT OR REPLACE INTO vocabulary 
-        (user_id, word, translation, part_of_speech, related_forms, similar_words, related_phrases, example_sentence, example_translation, teacher_explanation, category, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (user_id, word, translation, part_of_speech, related_forms, similar_words, related_phrases, example_sentence, example_translation, teacher_explanation, category, created_at, review_stage, last_reviewed, next_review)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       userId,
       word.toLowerCase(),
@@ -72,7 +75,10 @@ export async function onRequestPost(context) {
       exampleTranslation || '',
       teacherExplanation || '',
       categoryJson,
-      Date.now()
+      Date.now(),
+      reviewStage || 0,
+      lastReviewed || 0,
+      nextReview || 0
     ).run();
 
     return Response.json({ success: true });
