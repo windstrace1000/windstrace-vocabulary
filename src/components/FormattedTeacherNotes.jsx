@@ -22,26 +22,28 @@ const FormattedTeacherNotes = ({ text }) => {
   };
 
   // 3. 高亮格式化函數 (處理粗體、底線、發音)
-  const formatText = (content) => {
+  const formatText = (content, shouldAddAudio = true) => {
     // 使用正則表達式捕獲 **粗體** 或 <u>底線</u>
     const parts = content.split(/(\*\*.*?\*\*|<u>.*?<\/u>)/g);
     
     return parts.map((part, i) => {
-      // 粗體 -> 加入點擊發音按鈕
+      // 粗體 -> 視情況加入點擊發音按鈕
       if (part.startsWith('**') && part.endsWith('**')) {
         const wordMatch = part.slice(2, -2);
         return (
           <span key={i} className="inline-flex items-center gap-1 align-baseline group">
             <strong className="text-indigo-900 font-bold">{wordMatch}</strong>
-            <button 
-              onClick={() => handleSpeak(wordMatch)}
-              className="cursor-pointer transform hover:scale-110 active:scale-95 transition-all text-indigo-400 hover:text-indigo-600 focus:outline-none"
-              title="播放發音"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-              </svg>
-            </button>
+            {shouldAddAudio && (
+              <button 
+                onClick={() => handleSpeak(wordMatch)}
+                className="cursor-pointer transform hover:scale-110 active:scale-95 transition-all text-indigo-400 hover:text-indigo-600 focus:outline-none"
+                title="播放發音"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                </svg>
+              </button>
+            )}
           </span>
         );
       }
@@ -76,7 +78,7 @@ const FormattedTeacherNotes = ({ text }) => {
                       <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-sm">
                         {line.match(/^\d+/)[0]}
                       </span>
-                      {formatText(line.replace(/^\d+\.\s*/, ''))}
+                      {formatText(line.replace(/^\d+\.\s*/, ''), false)}
                     </div>
                   );
                 }
