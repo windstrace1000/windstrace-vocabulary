@@ -2,6 +2,8 @@
 // TTS 語音播放工具
 // ==========================================
 
+import { getSpeechRate } from './apiKey';
+
 /**
  * 取得高品質的英文語音
  */
@@ -29,6 +31,8 @@ const getBestVoice = () => {
 export const playAudio = async (text) => {
   if (!text) return;
 
+  const currentRate = parseFloat(getSpeechRate());
+
   // 1. 嘗試尋找本地高品質 (Natural/Google) 語音
   const bestVoice = getBestVoice();
   
@@ -37,7 +41,7 @@ export const playAudio = async (text) => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.voice = bestVoice;
     utterance.lang = bestVoice.lang;
-    utterance.rate = 0.85; 
+    utterance.rate = currentRate; 
     utterance.pitch = 1.0;
     window.speechSynthesis.speak(utterance);
     return;
@@ -48,6 +52,9 @@ export const playAudio = async (text) => {
   try {
     const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en&client=tw-ob`;
     const audio = new Audio(audioUrl);
+    
+    // HTML5 Audio 本身也支援 playbackRate
+    audio.playbackRate = currentRate;
     await audio.play();
   } catch (error) {
     // 3. 最後的墊底方案：使用本地普通語音
@@ -55,7 +62,7 @@ export const playAudio = async (text) => {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
-      utterance.rate = 0.9;
+      utterance.rate = currentRate;
       window.speechSynthesis.speak(utterance);
     }
   }

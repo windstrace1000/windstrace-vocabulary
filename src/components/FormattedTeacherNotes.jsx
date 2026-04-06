@@ -1,4 +1,5 @@
 import React from 'react';
+import { getSpeechRate } from '../utils/apiKey';
 
 /**
  * FormattedTeacherNotes - 專門用來渲染老師講解內容的格式化組件
@@ -16,7 +17,7 @@ const FormattedTeacherNotes = ({ text }) => {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(word);
       utterance.lang = 'en-US';
-      utterance.rate = 0.9;
+      utterance.rate = parseFloat(getSpeechRate());
       window.speechSynthesis.speak(utterance);
     }
   };

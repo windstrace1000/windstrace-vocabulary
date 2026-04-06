@@ -32,3 +32,16 @@ export const getGeminiModel = () => {
 export const setGeminiModel = (modelName) => {
   localStorage.setItem(API_MODEL_STORAGE, modelName);
 };
+
+// --- 語音朗讀速度設定 ---
+const SPEECH_RATE_STORAGE = 'vocabulary_master_speech_rate';
+const DEFAULT_SPEECH_RATE = '0.85';
+
+export const getSpeechRate = () => {
+  return localStorage.getItem(SPEECH_RATE_STORAGE) || DEFAULT_SPEECH_RATE;
+};
+
+export const setSpeechRate = (rate) => {
+  localStorage.setItem(SPEECH_RATE_STORAGE, rate.toString());
+};
+

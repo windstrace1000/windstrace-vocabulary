@@ -3,14 +3,15 @@
 // ==========================================
 
 import { useState } from 'react';
-import { X, Key, ShieldCheck, AlertCircle, Cpu, Book, Newspaper, Plus, Trash2, Smartphone, Copy, Check, RotateCw } from 'lucide-react';
-import { getGeminiApiKey, setGeminiApiKey, getGeminiModel, setGeminiModel } from '../utils/apiKey';
+import { X, Key, ShieldCheck, AlertCircle, Cpu, Book, Newspaper, Plus, Trash2, Smartphone, Copy, Check, RotateCw, Volume2 } from 'lucide-react';
+import { getGeminiApiKey, setGeminiApiKey, getGeminiModel, setGeminiModel, getSpeechRate, setSpeechRate } from '../utils/apiKey';
 import { getCategorySettings, saveCategorySettings } from '../utils/categories';
 import { getUserId, setUserId } from '../utils/userId';
 
 export default function SettingsModal({ isOpen, onClose }) {
   const [apiKeyInput, setApiKeyInput] = useState(getGeminiApiKey());
   const [modelInput, setModelInput] = useState(getGeminiModel());
+  const [speechRateInput, setSpeechRateInput] = useState(getSpeechRate());
   const [categories, setCategories] = useState(getCategorySettings());
   
   const currentUserId = getUserId();
@@ -28,6 +29,7 @@ export default function SettingsModal({ isOpen, onClose }) {
   const handleSave = () => {
     setGeminiApiKey(apiKeyInput);
     setGeminiModel(modelInput);
+    setSpeechRate(speechRateInput);
     saveCategorySettings(categories);
     
     const idChanged = userIdInput.trim() !== currentUserId && userIdInput.trim() !== '';
@@ -151,6 +153,29 @@ export default function SettingsModal({ isOpen, onClose }) {
                 <option value="gemini-2.5-flash">Gemini 2.5 Flash 穩定版</option>
                 <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (輕量版)</option>
               </select>
+            </div>
+
+            <div>
+              <label className="flex items-center justify-between text-sm font-semibold text-slate-700 mb-2">
+                <span className="flex items-center gap-1.5">
+                  <Volume2 className="w-4 h-4 text-slate-500" /> 朗讀速度設定
+                </span>
+                <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-xs font-bold">{speechRateInput}x</span>
+              </label>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-slate-400">慢</span>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="2.0"
+                  step="0.05"
+                  value={speechRateInput}
+                  onChange={(e) => setSpeechRateInput(e.target.value)}
+                  className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                />
+                <span className="text-xs text-slate-400">快</span>
+              </div>
+              <p className="text-[10px] text-slate-400 mt-1.5 italic">※ 此設定將同步套用於單字、例句以及老師筆記的發音。</p>
             </div>
             
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 text-sm text-amber-800">
