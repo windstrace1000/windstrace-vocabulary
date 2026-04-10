@@ -152,3 +152,29 @@ export const deleteWord = async (userId, word) => {
   if (!response.ok) throw new Error('刪除失敗');
   return response.json();
 };
+
+/**
+ * 將使用者的單字庫同步至 Notion 
+ */
+export const syncToNotion = async (userId, notionApiKey, notionDatabaseId) => {
+  if (!notionApiKey || !notionDatabaseId) {
+    throw new Error('未提供 Notion API Key 或 Database ID');
+  }
+
+  const response = await fetch(`${API_BASE}/sync-notion`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Notion-Api-Key': notionApiKey,
+      'X-Notion-Database-Id': notionDatabaseId
+    },
+    body: JSON.stringify({ userId }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || '同步到 Notion 失敗');
+  }
+
+  return response.json();
+};

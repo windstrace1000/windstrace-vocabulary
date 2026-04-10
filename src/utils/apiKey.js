@@ -45,3 +45,30 @@ export const setSpeechRate = (rate) => {
   localStorage.setItem(SPEECH_RATE_STORAGE, rate.toString());
 };
 
+// --- Notion 同步設定 ---
+const NOTION_API_KEY_STORAGE = 'vocabulary_master_notion_api_key';
+const NOTION_DATABASE_ID_STORAGE = 'vocabulary_master_notion_database_id';
+
+export const getNotionApiKey = () => {
+  return localStorage.getItem(NOTION_API_KEY_STORAGE) || '';
+};
+
+export const setNotionApiKey = (key) => {
+  if (key) {
+    localStorage.setItem(NOTION_API_KEY_STORAGE, key.trim());
+  } else {
+    localStorage.removeItem(NOTION_API_KEY_STORAGE);
+  }
+};
+
+export const getNotionDatabaseId = () => {
+  return localStorage.getItem(NOTION_DATABASE_ID_STORAGE) || '';
+};
+
+export const setNotionDatabaseId = (id) => {
+  if (id) {
+    localStorage.setItem(NOTION_DATABASE_ID_STORAGE, id.trim());
+  } else {
+    localStorage.removeItem(NOTION_DATABASE_ID_STORAGE);
+  }
+};

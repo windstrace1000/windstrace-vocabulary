@@ -3,10 +3,11 @@
 // ==========================================
 
 import { useState } from 'react';
-import { X, Key, ShieldCheck, AlertCircle, Cpu, Book, Newspaper, Plus, Trash2, Smartphone, Copy, Check, RotateCw, Volume2 } from 'lucide-react';
-import { getGeminiApiKey, setGeminiApiKey, getGeminiModel, setGeminiModel, getSpeechRate, setSpeechRate } from '../utils/apiKey';
+import { X, Key, ShieldCheck, AlertCircle, Cpu, Book, Newspaper, Plus, Trash2, Smartphone, Copy, Check, RotateCw, Volume2, Database, RefreshCw, Loader2, Link } from 'lucide-react';
+import { getGeminiApiKey, setGeminiApiKey, getGeminiModel, setGeminiModel, getSpeechRate, setSpeechRate, getNotionApiKey, setNotionApiKey, getNotionDatabaseId, setNotionDatabaseId } from '../utils/apiKey';
 import { getCategorySettings, saveCategorySettings } from '../utils/categories';
 import { getUserId, setUserId } from '../utils/userId';
+import { syncToNotion } from '../services/api';
 
 export default function SettingsModal({ isOpen, onClose }) {
   const [apiKeyInput, setApiKeyInput] = useState(getGeminiApiKey());
@@ -24,6 +25,13 @@ export default function SettingsModal({ isOpen, onClose }) {
 
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  // Notion 同步設定
+  const [notionApiKey, setNotionApiKeyInput] = useState(getNotionApiKey());
+  const [notionDbId, setNotionDbIdInput] = useState(getNotionDatabaseId());
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState(''); // success, error, or empty
+  const [syncMsg, setSyncMsg] = useState('');
+
   if (!isOpen) return null;
 
   const handleSave = () => {
@@ -31,6 +39,8 @@ export default function SettingsModal({ isOpen, onClose }) {
     setGeminiModel(modelInput);
     setSpeechRate(speechRateInput);
     saveCategorySettings(categories);
+    setNotionApiKey(notionApiKey);
+    setNotionDatabaseId(notionDbId);
     
     const idChanged = userIdInput.trim() !== currentUserId && userIdInput.trim() !== '';
     if (idChanged) {
@@ -60,6 +70,33 @@ export default function SettingsModal({ isOpen, onClose }) {
   const generateRandomId = () => {
     const newId = crypto.randomUUID().split('-')[0];
     setUserIdInput(newId);
+  };
+
+  const handleSyncNotion = async () => {
+    if (!notionApiKey.trim() || !notionDbId.trim()) {
+      setSyncStatus('error');
+      setSyncMsg('請先填寫上方 Notion API Key 與 Database ID，並點擊彈窗下方「儲存設定」後再試');
+      return;
+    }
+    
+    // 先寫入本地確保一致性
+    setNotionApiKey(notionApiKey);
+    setNotionDatabaseId(notionDbId);
+
+    setIsSyncing(true);
+    setSyncStatus('');
+    setSyncMsg('同步中，這可能需要一點時間，請稍候...');
+
+    try {
+      await syncToNotion(currentUserId, notionApiKey, notionDbId);
+      setSyncStatus('success');
+      setSyncMsg('✅ 單字庫成功同步至 Notion！');
+    } catch (err) {
+      setSyncStatus('error');
+      setSyncMsg(`❌ 同步失敗: ${err.message}`);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const addCategory = (type) => {
@@ -228,6 +265,67 @@ export default function SettingsModal({ isOpen, onClose }) {
                 <p className="font-semibold text-indigo-800 mb-1">📢 如何同步？</p>
                 <p>在其他裝置填入「同一個同步 ID」，按儲存後就會看到相同的單字本。 ID 本身就是識別證，請設定一組好記但不易被猜到的文字。</p>
               </div>
+            </div>
+          </section>
+
+          <hr className="border-slate-100" />
+
+          {/* Notion 同步設定區 */}
+          <section className="space-y-4">
+            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><Database className="w-4 h-4 text-indigo-500"/> Notion 單字本備份與同步</h4>
+            
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+              
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs sm:text-sm text-blue-800 leading-relaxed">
+                <p className="font-bold flex items-center gap-1.5 mb-2 text-blue-900"><Key className="w-4 h-4"/> 忘記金鑰了嗎？</p>
+                <ul className="list-disc leading-relaxed pl-5 space-y-1.5 text-blue-700/90 font-medium">
+                  <li>API Key: 前往 <a href="https://www.notion.so/my-integrations" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-900 text-blue-800 inline-flex items-center">Notion 開發者平台 <Link className="w-3 h-3 ml-0.5" /></a>，點擊「單字 APP 同步助手」&gt; Secrets 取得。</li>
+                  <li>Database ID: 打開您建立好的 Notion 單字庫，複製該頁面的網址，網址中 **最長的那 32 位英數字** 即是 ID。</li>
+                </ul>
+                <p className="mt-3 text-[11px] opacity-80 italic">提示：只要填寫一次，瀏覽器就會自動本機記下。不需要每次都輸入哦！</p>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Notion API Key (Internal Integration Secret)</label>
+                  <input
+                    type="password"
+                    value={notionApiKey}
+                    onChange={(e) => setNotionApiKeyInput(e.target.value)}
+                    placeholder="secret_..."
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all font-mono text-sm shadow-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Notion Database ID</label>
+                  <input
+                    type="text"
+                    value={notionDbId}
+                    onChange={(e) => setNotionDbIdInput(e.target.value)}
+                    placeholder="32位英數 ID..."
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all font-mono text-sm shadow-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button 
+                  onClick={handleSyncNotion}
+                  disabled={isSyncing}
+                  className={`w-full py-3 px-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm
+                    ${isSyncing ? 'bg-slate-200 text-slate-500 cursor-not-allowed' : 'bg-slate-800 text-white hover:bg-slate-700 active:scale-[0.98]'}`}
+                >
+                  {isSyncing ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCw className="w-5 h-5" />}
+                  {isSyncing ? '正在備份所有單字進 Notion...' : '⬆️ 開始同步單字庫至 Notion'}
+                </button>
+                {syncMsg && (
+                  <div className={`mt-3 p-3 rounded-xl border text-sm font-medium ${syncStatus === 'success' ? 'bg-green-50 border-green-200 text-green-700' : syncStatus === 'error' ? 'bg-red-50 border-red-200 text-red-600' : 'bg-indigo-50 border-indigo-200 text-indigo-700 flex items-center gap-2'}`}>
+                     {syncStatus === '' && isSyncing && <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />}
+                     {syncMsg}
+                  </div>
+                )}
+              </div>
+              
             </div>
           </section>
 
